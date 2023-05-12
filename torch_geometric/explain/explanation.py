@@ -37,11 +37,7 @@ class ExplanationMixin:
                     f"Expected a 'node_mask' with {store.num_nodes} nodes "
                     f"(got {store.node_mask.size(0)} nodes)", raise_on_error)
 
-            if 'x' in store:
-                num_features = store.x.size(-1)
-            else:
-                num_features = store.node_mask.size(-1)
-
+            num_features = store.x.size(-1) if 'x' in store else store.node_mask.size(-1)
             if store.node_mask.size(1) not in {1, num_features}:
                 status = False
                 warn_or_raise(
@@ -78,26 +74,20 @@ class ExplanationMixin:
         if threshold_config.type == ThresholdType.hard:
             return (mask > threshold_config.value).float()
 
-        if threshold_config.type in [
-                ThresholdType.topk,
-                ThresholdType.topk_hard,
-        ]:
+        if threshold_config.type in [ThresholdType.topk, ThresholdType.topk_hard]:
             if threshold_config.value >= mask.numel():
-                if threshold_config.type == ThresholdType.topk:
-                    return mask
-                else:
-                    return torch.ones_like(mask)
-
+                return (
+                    mask
+                    if threshold_config.type == ThresholdType.topk
+                    else torch.ones_like(mask)
+                )
             value, index = torch.topk(
                 mask.flatten(),
                 k=threshold_config.value,
             )
 
             out = torch.zeros_like(mask.flatten())
-            if threshold_config.type == ThresholdType.topk:
-                out[index] = value
-            else:
-                out[index] = 1.0
+            out[index] = value if threshold_config.type == ThresholdType.topk else 1.0
             return out.view(mask.size())
 
         assert False

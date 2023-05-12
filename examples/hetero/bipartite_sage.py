@@ -113,9 +113,8 @@ class Model(torch.nn.Module):
         self.decoder = EdgeDecoder(out_channels)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
-        z_dict = {}
         x_dict['user'] = self.user_emb(x_dict['user'])
-        z_dict['user'] = self.user_encoder(x_dict, edge_index_dict)
+        z_dict = {'user': self.user_encoder(x_dict, edge_index_dict)}
         z_dict['movie'] = self.movie_encoder(
             x_dict['movie'],
             edge_index_dict[('movie', 'metapath_0', 'movie')],

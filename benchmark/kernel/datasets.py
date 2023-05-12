@@ -44,16 +44,12 @@ def get_dataset(name, sparse=True, cleaned=False):
             num_nodes += data.num_nodes
             max_num_nodes = max(data.num_nodes, max_num_nodes)
 
-        # Filter out a few really large graphs in order to apply DiffPool.
-        if name == 'REDDIT-BINARY':
-            num_nodes = min(int(num_nodes / len(dataset) * 1.5), max_num_nodes)
-        else:
-            num_nodes = min(int(num_nodes / len(dataset) * 5), max_num_nodes)
-
-        indices = []
-        for i, data in enumerate(dataset):
-            if data.num_nodes <= num_nodes:
-                indices.append(i)
+        num_nodes = (
+            min(int(num_nodes / len(dataset) * 1.5), max_num_nodes)
+            if name == 'REDDIT-BINARY'
+            else min(int(num_nodes / len(dataset) * 5), max_num_nodes)
+        )
+        indices = [i for i, data in enumerate(dataset) if data.num_nodes <= num_nodes]
         dataset = dataset.copy(torch.tensor(indices))
 
         if dataset.transform is None:

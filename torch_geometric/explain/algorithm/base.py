@@ -143,19 +143,21 @@ class ExplainerAlgorithm(torch.nn.Module):
         r"""Returns the number of hops the :obj:`model` is aggregating
         information from.
         """
-        num_hops = 0
-        for module in model.modules():
-            if isinstance(module, MessagePassing):
-                num_hops += 1
-        return num_hops
+        return sum(
+            1 for module in model.modules() if isinstance(module, MessagePassing)
+        )
 
     @staticmethod
     def _flow(model: torch.nn.Module) -> str:
         r"""Determines the message passing flow of the :obj:`model`."""
-        for module in model.modules():
-            if isinstance(module, MessagePassing):
-                return module.flow
-        return 'source_to_target'
+        return next(
+            (
+                module.flow
+                for module in model.modules()
+                if isinstance(module, MessagePassing)
+            ),
+            'source_to_target',
+        )
 
     def _loss_binary_classification(self, y_hat: Tensor, y: Tensor) -> Tensor:
         if self.model_config.return_type == ModelReturnType.raw:

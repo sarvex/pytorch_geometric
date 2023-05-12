@@ -19,7 +19,7 @@ from torch_geometric.typing import InputEdges, InputNodes, OptTensor
 try:
     from pytorch_lightning import LightningDataModule as PLLightningDataModule
     no_pytorch_lightning = False
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     PLLightningDataModule = object
     no_pytorch_lightning = True
 
@@ -115,7 +115,7 @@ class LightningData(LightningDataModule):
 
         # Determine sampler and loader arguments ##############################
 
-        if loader in ['neighbor', 'link_neighbor']:
+        if loader in {'neighbor', 'link_neighbor'}:
 
             # Define a new `NeighborSampler` to be re-used across data loaders:
             sampler_kwargs, self.loader_kwargs = split_kwargs(
@@ -395,8 +395,8 @@ class LightningNodeData(LightningData):
 
         if input_val_nodes is None:
             input_val_nodes = infer_input_nodes(data, split='val')
-            if input_val_nodes is None:
-                input_val_nodes = infer_input_nodes(data, split='valid')
+        if input_val_nodes is None:
+            input_val_nodes = infer_input_nodes(data, split='valid')
 
         if input_test_nodes is None:
             input_test_nodes = infer_input_nodes(data, split='test')

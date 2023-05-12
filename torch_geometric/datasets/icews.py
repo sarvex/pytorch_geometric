@@ -79,7 +79,7 @@ class ICEWS18(EventDataset):
         pre_transform: Optional[Callable] = None,
         pre_filter: Optional[Callable] = None,
     ):
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
         super().__init__(root, transform, pre_transform, pre_filter)
         idx = self.processed_file_names.index(f'{split}.pt')
         self.data, self.slices = torch.load(self.processed_paths[idx])

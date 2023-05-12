@@ -149,11 +149,10 @@ def test():
     y_true = y.cpu().unsqueeze(-1)
     y_pred = out.argmax(dim=-1, keepdim=True)
 
-    results = []
-    for mask in [data.train_mask, data.val_mask, data.test_mask]:
-        results += [int(y_pred[mask].eq(y_true[mask]).sum()) / int(mask.sum())]
-
-    return results
+    return [
+        int(y_pred[mask].eq(y_true[mask]).sum()) / int(mask.sum())
+        for mask in [data.train_mask, data.val_mask, data.test_mask]
+    ]
 
 
 for epoch in range(1, 11):

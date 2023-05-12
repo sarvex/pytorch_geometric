@@ -110,7 +110,7 @@ def test():
         data = data.to(device)
         out = model(data.x, data.edge_index, data.edge_attr)
 
-        for split in y_true.keys():
+        for split in y_true:
             mask = data[f'{split}_mask']
             y_true[split].append(data.y[mask].cpu())
             y_pred[split].append(out[mask].cpu())

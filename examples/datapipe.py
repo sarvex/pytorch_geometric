@@ -98,12 +98,8 @@ if __name__ == '__main__':
     # The first epoch will take longer than the remaining ones...
     print('Iterating over all data...')
     t = time.perf_counter()
-    for batch in datapipe:
-        pass
     print(f'Done! [{time.perf_counter() - t:.2f}s]')
 
     print('Iterating over all data a second time...')
     t = time.perf_counter()
-    for batch in datapipe:
-        pass
     print(f'Done! [{time.perf_counter() - t:.2f}s]')

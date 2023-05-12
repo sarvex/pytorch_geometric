@@ -26,7 +26,7 @@ def test_compose_filters():
         lambda d: d.num_nodes > 2,
         lambda d: d.num_edges > 2,
     ])
-    assert str(filter_fn)[:16] == 'ComposeFilters(['
+    assert str(filter_fn).startswith('ComposeFilters([')
 
     data1 = Data(x=torch.arange(3))
     assert not filter_fn(data1)

@@ -165,12 +165,12 @@ class AttributedGraphDataset(InMemoryDataset):
         with open(self.raw_paths[2], 'r') as f:
             ys = f.read().split('\n')[:-1]
             ys = [[int(y) - 1 for y in row.split()[1:]] for row in ys]
-            multilabel = max([len(y) for y in ys]) > 1
+            multilabel = max(len(y) for y in ys) > 1
 
         if not multilabel:
             y = torch.tensor(ys).view(-1)
         else:
-            num_classes = max([y for row in ys for y in row]) + 1
+            num_classes = max(y for row in ys for y in row) + 1
             y = torch.zeros((len(ys), num_classes), dtype=torch.float)
             for i, row in enumerate(ys):
                 for j in row:

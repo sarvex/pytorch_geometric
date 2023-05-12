@@ -9,7 +9,7 @@ def init_weights(m):
         m (nn.Module): PyTorch module
 
     """
-    if isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.BatchNorm1d):
+    if isinstance(m, (nn.BatchNorm2d, nn.BatchNorm1d)):
         m.weight.data.fill_(1.0)
         m.bias.data.zero_()
     elif isinstance(m, nn.Linear):

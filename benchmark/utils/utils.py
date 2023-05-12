@@ -176,10 +176,7 @@ def test(model, loader, device, hetero, progress_bar=True,
     else:
         for batch in loader:
             batch = batch.to(device)
-            if hasattr(batch, 'adj_t'):
-                edge_index = batch.adj_t
-            else:
-                edge_index = batch.edge_index
+            edge_index = batch.adj_t if hasattr(batch, 'adj_t') else batch.edge_index
             out = model(batch.x, edge_index)
             batch_size = batch.batch_size
             out = out[:batch_size]

@@ -44,7 +44,7 @@ def set_hetero_masks(
     according to edge types."""
     for module in model.modules():
         if isinstance(module, torch.nn.ModuleDict):
-            for edge_type in mask_dict.keys():
+            for edge_type in mask_dict:
                 # TODO (jinu) Use common function get `str_edge_type`.
                 str_edge_type = '__'.join(edge_type)
                 if str_edge_type in module:

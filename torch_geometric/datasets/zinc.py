@@ -96,7 +96,7 @@ class ZINC(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
     ):
         self.subset = subset
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
         super().__init__(root, transform, pre_transform, pre_filter)
         path = osp.join(self.processed_dir, f'{split}.pt')
         self.data, self.slices = torch.load(path)

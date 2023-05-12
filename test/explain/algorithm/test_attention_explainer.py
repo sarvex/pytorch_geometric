@@ -45,8 +45,8 @@ def test_attention_explainer(index, check_explanation):
     check_explanation(explanation, None, explainer.edge_mask_type)
 
 
-@pytest.mark.parametrize('explanation_type', [e for e in ExplanationType])
-@pytest.mark.parametrize('node_mask_type', [m for m in MaskType])
+@pytest.mark.parametrize('explanation_type', list(ExplanationType))
+@pytest.mark.parametrize('node_mask_type', list(MaskType))
 def test_attention_explainer_supports(explanation_type, node_mask_type):
     with pytest.raises(ValueError, match="not support the given explanation"):
         Explainer(

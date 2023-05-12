@@ -18,7 +18,7 @@ def is_experimental_mode_enabled(options: Options = None) -> bool:
     :class:`torch_geometric.experimental_mode` for a list of (optional)
     options."""
     options = get_options(options)
-    return all([__experimental_flag__[option] for option in options])
+    return all(__experimental_flag__[option] for option in options)
 
 
 def set_experimental_mode_enabled(mode: bool, options: Options = None):

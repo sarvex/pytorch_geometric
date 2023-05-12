@@ -65,9 +65,9 @@ def test_temporal_data():
 
     assert data.get(key, 10) == 10
 
-    assert len([event for event in data]) == 3
+    assert len(list(data)) == 3
 
-    assert len([attr for attr in data()]) == 5
+    assert len(list(data())) == 5
 
     assert data.size() == (2, 5)
 
@@ -95,37 +95,37 @@ def test_temporal_indexing():
     elem = data[0]
     assert isinstance(elem, TemporalData)
     assert len(elem) == 1
-    assert elem.src.tolist() == data.src[0:1].tolist()
-    assert elem.dst.tolist() == data.dst[0:1].tolist()
-    assert elem.t.tolist() == data.t[0:1].tolist()
-    assert elem.msg.tolist() == data.msg[0:1].tolist()
-    assert elem.y.tolist() == data.y[0:1].tolist()
+    assert elem.src.tolist() == data.src[:1].tolist()
+    assert elem.dst.tolist() == data.dst[:1].tolist()
+    assert elem.t.tolist() == data.t[:1].tolist()
+    assert elem.msg.tolist() == data.msg[:1].tolist()
+    assert elem.y.tolist() == data.y[:1].tolist()
 
-    subset = data[0:5]
+    subset = data[:5]
     assert isinstance(subset, TemporalData)
     assert len(subset) == 5
-    assert subset.src.tolist() == data.src[0:5].tolist()
-    assert subset.dst.tolist() == data.dst[0:5].tolist()
-    assert subset.t.tolist() == data.t[0:5].tolist()
-    assert subset.msg.tolist() == data.msg[0:5].tolist()
-    assert subset.y.tolist() == data.y[0:5].tolist()
+    assert subset.src.tolist() == data.src[:5].tolist()
+    assert subset.dst.tolist() == data.dst[:5].tolist()
+    assert subset.t.tolist() == data.t[:5].tolist()
+    assert subset.msg.tolist() == data.msg[:5].tolist()
+    assert subset.y.tolist() == data.y[:5].tolist()
 
     index = [0, 4, 8]
     subset = data[torch.tensor(index)]
     assert isinstance(subset, TemporalData)
     assert len(subset) == 3
-    assert subset.src.tolist() == data.src[0::4].tolist()
-    assert subset.dst.tolist() == data.dst[0::4].tolist()
-    assert subset.t.tolist() == data.t[0::4].tolist()
-    assert subset.msg.tolist() == data.msg[0::4].tolist()
-    assert subset.y.tolist() == data.y[0::4].tolist()
+    assert subset.src.tolist() == data.src[::4].tolist()
+    assert subset.dst.tolist() == data.dst[::4].tolist()
+    assert subset.t.tolist() == data.t[::4].tolist()
+    assert subset.msg.tolist() == data.msg[::4].tolist()
+    assert subset.y.tolist() == data.y[::4].tolist()
 
     mask = [True, False, True, False, True, False, True, False, True, False]
     subset = data[torch.tensor(mask)]
     assert isinstance(subset, TemporalData)
     assert len(subset) == 5
-    assert subset.src.tolist() == data.src[0::2].tolist()
-    assert subset.dst.tolist() == data.dst[0::2].tolist()
-    assert subset.t.tolist() == data.t[0::2].tolist()
-    assert subset.msg.tolist() == data.msg[0::2].tolist()
-    assert subset.y.tolist() == data.y[0::2].tolist()
+    assert subset.src.tolist() == data.src[::2].tolist()
+    assert subset.dst.tolist() == data.dst[::2].tolist()
+    assert subset.t.tolist() == data.t[::2].tolist()
+    assert subset.msg.tolist() == data.msg[::2].tolist()
+    assert subset.y.tolist() == data.y[::2].tolist()

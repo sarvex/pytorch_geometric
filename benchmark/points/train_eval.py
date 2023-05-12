@@ -95,9 +95,7 @@ def test(model, test_loader, device):
         data = data.to(device)
         pred = model(data.pos, data.batch).max(1)[1]
         correct += pred.eq(data.y).sum().item()
-    test_acc = correct / len(test_loader.dataset)
-
-    return test_acc
+    return correct / len(test_loader.dataset)
 
 
 @torch.no_grad()

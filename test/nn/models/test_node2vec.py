@@ -20,7 +20,7 @@ def test_node2vec(device):
 
     acc = model.test(torch.ones(20, 16), torch.randint(10, (20, )),
                      torch.ones(20, 16), torch.randint(10, (20, )))
-    assert 0 <= acc and acc <= 1
+    assert 0 <= acc <= 1
 
     if is_full_test():
         jit = torch.jit.script(model)

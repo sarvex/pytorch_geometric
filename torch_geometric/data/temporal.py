@@ -114,9 +114,7 @@ class TemporalData(BaseData):
         return data
 
     def __getitem__(self, idx: Any) -> Any:
-        if isinstance(idx, str):
-            return self._store[idx]
-        return self.index_select(idx)
+        return self._store[idx] if isinstance(idx, str) else self.index_select(idx)
 
     def __setitem__(self, key: str, value: Any):
         """Sets the attribute :obj:`key` to :obj:`value`."""
@@ -149,8 +147,7 @@ class TemporalData(BaseData):
         return self.num_events
 
     def __call__(self, *args: List[str]) -> Iterable:
-        for key, value in self._store.items(*args):
-            yield key, value
+        yield from self._store.items(*args)
 
     def __copy__(self):
         out = self.__class__.__new__(self.__class__)
@@ -225,7 +222,7 @@ class TemporalData(BaseData):
     def __inc__(self, key: str, value: Any, *args, **kwargs) -> Any:
         if 'batch' in key:
             return int(value.max()) + 1
-        elif key in ['src', 'dst']:
+        elif key in {'src', 'dst'}:
             return self.num_nodes
         else:
             return 0

@@ -13,11 +13,10 @@ class SWISH(nn.Module):
         self.inplace = inplace
 
     def forward(self, x):
-        if self.inplace:
-            x.mul_(torch.sigmoid(x))
-            return x
-        else:
+        if not self.inplace:
             return x * torch.sigmoid(x)
+        x.mul_(torch.sigmoid(x))
+        return x
 
 
 register_act('swish', partial(SWISH, inplace=cfg.mem.inplace))

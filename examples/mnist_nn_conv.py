@@ -75,12 +75,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 def train(epoch):
     model.train()
 
-    if epoch == 16:
-        for param_group in optimizer.param_groups:
+    for param_group in optimizer.param_groups:
+        if epoch == 16:
             param_group['lr'] = 0.001
 
-    if epoch == 26:
-        for param_group in optimizer.param_groups:
+        elif epoch == 26:
             param_group['lr'] = 0.0001
 
     for data in train_loader:

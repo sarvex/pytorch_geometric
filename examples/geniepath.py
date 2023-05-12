@@ -65,7 +65,8 @@ class GeniePath(torch.nn.Module):
         super().__init__()
         self.lin1 = torch.nn.Linear(in_dim, dim)
         self.gplayers = torch.nn.ModuleList(
-            [GeniePathLayer(dim) for i in range(layer_num)])
+            [GeniePathLayer(dim) for _ in range(layer_num)]
+        )
         self.lin2 = torch.nn.Linear(dim, out_dim)
 
     def forward(self, x, edge_index):
@@ -83,18 +84,18 @@ class GeniePathLazy(torch.nn.Module):
         super().__init__()
         self.lin1 = torch.nn.Linear(in_dim, dim)
         self.breadths = torch.nn.ModuleList(
-            [Breadth(dim, dim) for i in range(layer_num)])
+            [Breadth(dim, dim) for _ in range(layer_num)]
+        )
         self.depths = torch.nn.ModuleList(
-            [Depth(dim * 2, lstm_hidden) for i in range(layer_num)])
+            [Depth(dim * 2, lstm_hidden) for _ in range(layer_num)]
+        )
         self.lin2 = torch.nn.Linear(dim, out_dim)
 
     def forward(self, x, edge_index):
         x = self.lin1(x)
         h = torch.zeros(1, x.shape[0], lstm_hidden, device=x.device)
         c = torch.zeros(1, x.shape[0], lstm_hidden, device=x.device)
-        h_tmps = []
-        for i, l in enumerate(self.breadths):
-            h_tmps.append(self.breadths[i](x, edge_index))
+        h_tmps = [self.breadths[i](x, edge_index) for i, l in enumerate(self.breadths)]
         x = x[None, :]
         for i, l in enumerate(self.depths):
             in_cat = torch.cat((h_tmps[i][None, :], x), -1)

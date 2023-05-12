@@ -334,7 +334,7 @@ def test_batching_of_batches():
 
     batch = Batch.from_data_list([batch, batch])
     assert batch.num_graphs == len(batch) == 2
-    assert batch.x[0:2].tolist() == data.x.tolist()
+    assert batch.x[:2].tolist() == data.x.tolist()
     assert batch.x[2:4].tolist() == data.x.tolist()
     assert batch.x[4:6].tolist() == data.x.tolist()
     assert batch.x[6:8].tolist() == data.x.tolist()

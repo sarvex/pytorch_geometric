@@ -65,7 +65,7 @@ class DummyExplainer(ExplainerAlgorithm):
                 if edge_mask is not None:
                     edge_dict[k]['edge_mask'] = edge_mask
 
-            return HeteroExplanation({**node_dict, **edge_dict})
+            return HeteroExplanation(node_dict | edge_dict)
 
     def supports(self) -> bool:
         return True

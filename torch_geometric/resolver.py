@@ -37,5 +37,5 @@ def resolver(classes: List[Any], class_dict: Dict[str, Any],
             assert callable(cls)
             return cls
 
-    choices = set(cls.__name__ for cls in classes) | set(class_dict.keys())
+    choices = {cls.__name__ for cls in classes} | set(class_dict.keys())
     raise ValueError(f"Could not resolve '{query}' among choices {choices}")

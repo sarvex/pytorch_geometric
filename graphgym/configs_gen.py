@@ -42,10 +42,7 @@ def parse_args():
 
 
 def get_fname(string):
-    if string is not None:
-        return string.split('/')[-1].split('.')[0]
-    else:
-        return 'default'
+    return string.split('/')[-1].split('.')[0] if string is not None else 'default'
 
 
 def grid2list(grid):
@@ -53,38 +50,30 @@ def grid2list(grid):
     for grid_temp in grid:
         list_out = []
         for val in grid_temp:
-            for list_temp in list_in:
-                list_out.append(list_temp + [val])
+            list_out.extend(list_temp + [val] for list_temp in list_in)
         list_in = list_out
     return list_in
 
 
 def lists_distance(l1, l2):
     assert len(l1) == len(l2)
-    dist = 0
-    for i in range(len(l1)):
-        if l1[i] != l2[i]:
-            dist += 1
-    return dist
+    return sum(1 for i in range(len(l1)) if l1[i] != l2[i])
 
 
 def grid2list_sample(grid, sample=10):
     configs = []
     while len(configs) < sample:
-        config = []
-        for grid_temp in grid:
-            config.append(random.choice(grid_temp))
+        config = [random.choice(grid_temp) for grid_temp in grid]
         if config not in configs:
             configs.append(config)
     return configs
 
 
 def load_config(fname):
-    if fname is not None:
-        with open(fname) as f:
-            return yaml.load(f, Loader=yaml.FullLoader)
-    else:
+    if fname is None:
         return {}
+    with open(fname) as f:
+        return yaml.load(f, Loader=yaml.FullLoader)
 
 
 def load_search_file(fname):
@@ -206,7 +195,7 @@ def gen_grid_sample(args, config, config_budget={}, compare_alias_list=[]):
             vars_grid[alias_id] = vars_grid_select
             for vars in vars_value:
                 config_out = config.copy()
-                fname_out = fname_start + f'-sample={vars_alias[alias_id]}'
+                fname_out = f'{fname_start}-sample={vars_alias[alias_id]}'
                 for id, var in enumerate(vars):
                     if len(vars_label[id]) == 1:
                         config_out[vars_label[id][0]] = var

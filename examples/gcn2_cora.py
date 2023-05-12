@@ -73,8 +73,10 @@ def train():
 def test():
     model.eval()
     pred, accs = model(data.x, data.adj_t).argmax(dim=-1), []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        accs.append(int((pred[mask] == data.y[mask]).sum()) / int(mask.sum()))
+    accs.extend(
+        int((pred[mask] == data.y[mask]).sum()) / int(mask.sum())
+        for _, mask in data('train_mask', 'val_mask', 'test_mask')
+    )
     return accs
 
 

@@ -87,14 +87,14 @@ class BaseStorage(MutableMapping):
             propobj.fset(self, value)
         elif key == '_parent':
             self.__dict__[key] = weakref.ref(value)
-        elif key[:1] == '_':
+        elif key.startswith('_'):
             self.__dict__[key] = value
         else:
             self._pop_cache(key)
             self[key] = value
 
     def __delattr__(self, key: str):
-        if key[:1] == '_':
+        if key.startswith('_'):
             del self.__dict__[key]
         else:
             self._pop_cache(key)
@@ -308,15 +308,9 @@ class NodeStorage(BaseStorage):
             ("'data'" if self._key is None else f"'data[{self._key}]'") +
             " to suppress this warning")
         if 'edge_index' in self and isinstance(self.edge_index, Tensor):
-            if self.edge_index.numel() > 0:
-                return int(self.edge_index.max()) + 1
-            else:
-                return 0
+            return int(self.edge_index.max()) + 1 if self.edge_index.numel() > 0 else 0
         if 'face' in self and isinstance(self.face, Tensor):
-            if self.face.numel() > 0:
-                return int(self.face.max()) + 1
-            else:
-                return 0
+            return int(self.face.max()) + 1 if self.face.numel() > 0 else 0
         return None
 
     @property
@@ -387,7 +381,7 @@ class EdgeStorage(BaseStorage):
     @property
     def _key(self) -> EdgeType:
         key = self.__dict__.get('_key', None)
-        if key is None or not isinstance(key, tuple) or not len(key) == 3:
+        if key is None or not isinstance(key, tuple) or len(key) != 3:
             raise ValueError("'_key' does not denote a valid edge type")
         return key
 

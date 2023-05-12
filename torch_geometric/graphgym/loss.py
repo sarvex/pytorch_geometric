@@ -44,5 +44,4 @@ def compute_loss(pred, true):
         true = true.float()
         return mse_loss(pred, true), pred
     else:
-        raise ValueError('Loss func {} not supported'.format(
-            cfg.model.loss_fun))
+        raise ValueError(f'Loss func {cfg.model.loss_fun} not supported')

@@ -95,7 +95,7 @@ class UPFD(InMemoryDataset):
         self.feature = feature
         super().__init__(root, transform, pre_transform, pre_filter)
 
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
         path = self.processed_paths[['train', 'val', 'test'].index(split)]
         self.data, self.slices = torch.load(path)
 

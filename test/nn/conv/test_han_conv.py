@@ -48,12 +48,13 @@ def test_han_conv():
         assert torch.allclose(out_dict1[key], out_dict2[key], atol=1e-6)
 
     if torch_geometric.typing.WITH_TORCH_SPARSE:
-        adj_t_dict2 = {}
-        for edge_type, edge_index in edge_index_dict.items():
-            adj_t_dict2[edge_type] = SparseTensor.from_edge_index(
+        adj_t_dict2 = {
+            edge_type: SparseTensor.from_edge_index(
                 edge_index,
                 sparse_sizes=adj_t_dict1[edge_type].size()[::-1],
             ).t()
+            for edge_type, edge_index in edge_index_dict.items()
+        }
         out_dict3 = conv(x_dict, adj_t_dict2)
         assert len(out_dict1) == len(out_dict3)
         for key in out_dict3.keys():
@@ -102,12 +103,13 @@ def test_han_conv_lazy():
         assert torch.allclose(out_dict1[key], out_dict2[key], atol=1e-6)
 
     if torch_geometric.typing.WITH_TORCH_SPARSE:
-        adj_t_dict2 = {}
-        for edge_type, edge_index in edge_index_dict.items():
-            adj_t_dict2[edge_type] = SparseTensor.from_edge_index(
+        adj_t_dict2 = {
+            edge_type: SparseTensor.from_edge_index(
                 edge_index,
                 sparse_sizes=adj_t_dict1[edge_type].size()[::-1],
             ).t()
+            for edge_type, edge_index in edge_index_dict.items()
+        }
         out_dict3 = conv(x_dict, adj_t_dict2)
         assert len(out_dict1) == len(out_dict3)
         for key in out_dict1.keys():

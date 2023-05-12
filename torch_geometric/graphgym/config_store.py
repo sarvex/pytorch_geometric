@@ -58,12 +58,12 @@ except ImportError:
     class Singleton(type):
         _instances: Dict[type, Any] = {}
 
-        def __call__(cls, *args, **kwargs) -> Any:
-            if cls not in cls._instances:
-                instance = super(Singleton, cls).__call__(*args, **kwargs)
-                cls._instances[cls] = instance
+        def __call__(self, *args, **kwargs) -> Any:
+            if self not in self._instances:
+                instance = super(Singleton, self).__call__(*args, **kwargs)
+                self._instances[self] = instance
                 return instance
-            return cls._instances[cls]
+            return self._instances[self]
 
     @dataclass
     class Metadata:
@@ -130,19 +130,16 @@ def map_annotation(
 
     origin = getattr(annotation, '__origin__', None)
     args = getattr(annotation, '__args__', [])
-    if origin == Union or origin == list or origin == dict:
+    if origin in [Union, list, dict]:
         annotation = copy.copy(annotation)
         annotation.__args__ = tuple(map_annotation(a, mapping) for a in args)
         return annotation
 
-    if annotation in mapping or {}:
+    if annotation in mapping:
         return mapping[annotation]
 
     out = dataclass_from_class(annotation)
-    if out is not None:
-        return out
-
-    return annotation
+    return out if out is not None else annotation
 
 
 def to_dataclass(
@@ -194,7 +191,7 @@ def to_dataclass(
     if strict:  # Check that keys in map_args or exclude_args are present.
         args = set() if map_args is None else set(map_args.keys())
         if exclude_args is not None:
-            args |= set([arg for arg in exclude_args if isinstance(arg, str)])
+            args |= {arg for arg in exclude_args if isinstance(arg, str)}
         diff = args - set(params.keys())
         if len(diff) > 0:
             raise ValueError(f"Expected input argument(s) {diff} in "
@@ -203,12 +200,12 @@ def to_dataclass(
     for i, (name, arg) in enumerate(params.items()):
         if name in EXCLUDE:
             continue
-        if exclude_args is not None:
-            if name in exclude_args or i in exclude_args:
-                continue
-        if base_cls is not None:
-            if name in base_cls.__dataclass_fields__:
-                continue
+        if exclude_args is not None and (
+            name in exclude_args or i in exclude_args
+        ):
+            continue
+        if base_cls is not None and name in base_cls.__dataclass_fields__:
+            continue
 
         if map_args is not None and name in map_args:
             fields.append((name, ) + map_args[name])
@@ -349,13 +346,7 @@ def fill_config_store():
 
     # Register `torch_geometric.transforms` ###################################
     transforms = torch_geometric.transforms
-    for cls_name in set(transforms.__all__) - set([
-            'BaseTransform',
-            'Compose',
-            'ComposeFilters',
-            'LinearTransformation',
-            'AddMetaPaths',  # TODO
-    ]):
+    for cls_name in (set(transforms.__all__) - {'BaseTransform', 'Compose', 'ComposeFilters', 'LinearTransformation', 'AddMetaPaths'}):
         cls = to_dataclass(getattr(transforms, cls_name), base_cls=Transform)
         # We use an explicit additional nesting level inside each config to
         # allow for applying multiple transformations.
@@ -382,27 +373,15 @@ def fill_config_store():
         config_store.store(cls_name, group='model', node=cls)
 
     # Register `torch.optim.Optimizer` ########################################
-    for cls_name in set([
-            key for key, cls in torch.optim.__dict__.items()
-            if inspect.isclass(cls) and issubclass(cls, torch.optim.Optimizer)
-    ]) - set([
-            'Optimizer',
-    ]):
+    for cls_name in ({key for key, cls in torch.optim.__dict__.items()
+                if inspect.isclass(cls) and issubclass(cls, torch.optim.Optimizer)} - {'Optimizer'}):
         cls = to_dataclass(getattr(torch.optim, cls_name), base_cls=Optimizer,
                            exclude_args=['params'])
         config_store.store(cls_name, group='optimizer', node=cls)
 
     # Register `torch.optim.lr_scheduler` #####################################
-    for cls_name in set([
-            key for key, cls in torch.optim.lr_scheduler.__dict__.items()
-            if inspect.isclass(cls)
-    ]) - set([
-            'Optimizer',
-            '_LRScheduler',
-            'Counter',
-            'SequentialLR',
-            'ChainedScheduler',
-    ]):
+    for cls_name in ({key for key, cls in torch.optim.lr_scheduler.__dict__.items()
+                if inspect.isclass(cls)} - {'Optimizer', '_LRScheduler', 'Counter', 'SequentialLR', 'ChainedScheduler'}):
         cls = to_dataclass(getattr(torch.optim.lr_scheduler, cls_name),
                            base_cls=LRScheduler, exclude_args=['optimizer'])
         config_store.store(cls_name, group='lr_scheduler', node=cls)

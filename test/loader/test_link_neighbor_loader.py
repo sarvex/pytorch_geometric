@@ -221,7 +221,7 @@ def test_temporal_hetero_link_neighbor_loader():
     )
     for batch in loader:
         # Check if each seed edge has a different batch:
-        assert int(batch['paper'].batch.max()) + 1 == 32
+        assert int(batch['paper'].batch.max()) == 31
 
         author_max = batch['author'].time.max()
         edge_max = batch['paper', 'paper'].edge_label_time.max()

@@ -134,7 +134,7 @@ class LRGBDataset(InMemoryDataset):
     ):
         self.name = name.lower()
         assert self.name in self.names
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
 
         super().__init__(root, transform, pre_transform, pre_filter)
         path = osp.join(self.processed_dir, f'{split}.pt')
@@ -249,11 +249,7 @@ class LRGBDataset(InMemoryDataset):
             79, 80, 81, 82, 84, 85, 86, 87, 88, 89, 90
         ]
 
-        label_map = {}
-        for i, key in enumerate(original_label_idx):
-            label_map[key] = i
-
-        return label_map
+        return {key: i for i, key in enumerate(original_label_idx)}
 
     def process_pcqm_contact(self):
         for split in ['train', 'val', 'test']:

@@ -126,15 +126,12 @@ class SHREC2016(InMemoryDataset):
             data.y_baryc = y[:, 1:]
             train_list.append(data)
 
-        test_list = []
         name = f'{self.part}_{self.cat}_*.off'
         paths = glob.glob(osp.join(self.raw_paths[1], self.part, name))
         paths = [path[:-4] for path in paths]
         paths = sorted(paths, key=lambda e: (len(e), e))
 
-        for path in paths:
-            test_list.append(read_off(f'{path}.off'))
-
+        test_list = [read_off(f'{path}.off') for path in paths]
         if self.pre_filter is not None:
             train_list = [d for d in train_list if self.pre_filter(d)]
             test_list = [d for d in test_list if self.pre_filter(d)]

@@ -101,7 +101,7 @@ class GraphMaskExplainer(ExplainerAlgorithm):
         **kwargs,
     ):
         super().__init__()
-        assert layer_type in ['GCN', 'GAT', 'FastRGCN']
+        assert layer_type in {'GCN', 'GAT', 'FastRGCN'}
         assert 0 <= penalty_scaling <= 10
         assert 0 <= init_lambda <= 1
         assert 0 <= allowance <= 1
@@ -177,7 +177,7 @@ class GraphMaskExplainer(ExplainerAlgorithm):
         return clipped_s, penalty
 
     def set_masks(self, i_dim, j_dim, h_dim, x, device):
-        if self.layer_type == 'GCN' or self.layer_type == 'GAT':
+        if self.layer_type in ['GCN', 'GAT']:
             i_dim = j_dim
         (num_nodes, num_feat), std = x.size(), 0.1
         self.feat_mask_type = self.explainer_config.node_mask_type
@@ -197,7 +197,7 @@ class GraphMaskExplainer(ExplainerAlgorithm):
         for v_dim, m_dim, h_dim in zip(i_dim, j_dim, h_dim):
             self.transform, self.layer_norm = [], []
             input_dims = [v_dim, m_dim, v_dim]
-            for _, input_dim in enumerate(input_dims):
+            for input_dim in input_dims:
                 self.transform.append(
                     Linear(input_dim, h_dim, bias=False).to(device))
                 self.layer_norm.append(LayerNorm(h_dim).to(device))
@@ -340,7 +340,7 @@ class GraphMaskExplainer(ExplainerAlgorithm):
                         index: Optional[Union[int, Tensor]] = None, **kwargs):
 
         if not isinstance(index, Tensor) and not isinstance(index, int) \
-                and index is not None:
+                    and index is not None:
             raise ValueError("'index' parameter can only be a 'Tensor', "
                              "'integer' or set to 'None' instead.")
 
@@ -373,7 +373,7 @@ class GraphMaskExplainer(ExplainerAlgorithm):
                         f'Train explainer for graph {index} with layer '
                         f'{layer}')
             self.enable_layer(layer)
-            for epoch in range(self.epochs):
+            for _ in range(self.epochs):
                 with torch.no_grad():
                     model(x, edge_index, **kwargs)
                 gates, total_penalty = [], 0
@@ -420,10 +420,12 @@ class GraphMaskExplainer(ExplainerAlgorithm):
                 h = x * self.node_feat_mask.sigmoid()
                 y_hat, y = model(x=h, edge_index=edge_index, **kwargs), target
 
-                if self.model_config.task_level == ModelTaskLevel.node \
-                        or self.model_config.task_level == ModelTaskLevel.edge:
-                    if index is not None:
-                        y_hat, y = y_hat[index], y[index]
+                if (
+                    self.model_config.task_level
+                    in [ModelTaskLevel.node, ModelTaskLevel.edge]
+                    and index is not None
+                ):
+                    y_hat, y = y_hat[index], y[index]
 
                 self._inject_messages(model, gates, self.baselines, True)
 

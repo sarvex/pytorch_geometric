@@ -153,8 +153,7 @@ class Net11(torch.nn.Module):
 
     def forward(self, x: Tensor, edge_index: Tensor) -> Tensor:
         xs = [x]
-        for _ in range(self.num_layers):
-            xs.append(self.conv(xs[-1], edge_index))
+        xs.extend(self.conv(xs[-1], edge_index) for _ in range(self.num_layers))
         return torch.cat(xs, dim=-1)
 
 
@@ -187,14 +186,14 @@ def test_to_hetero_basic():
     }
 
     if torch_geometric.typing.WITH_TORCH_SPARSE:
-        adj_t_dict = {}
-        for edge_type, (row, col) in edge_index_dict.items():
-            adj_t_dict[edge_type] = SparseTensor(
+        adj_t_dict = {
+            edge_type: SparseTensor(
                 row=col,
                 col=row,
                 sparse_sizes=(100, 100),
             )
-
+            for edge_type, (row, col) in edge_index_dict.items()
+        }
     metadata = list(x_dict.keys()), list(edge_index_dict.keys())
 
     model = Net1()
@@ -223,7 +222,7 @@ def test_to_hetero_basic():
         if torch_geometric.typing.WITH_TORCH_SPARSE:
             out2 = model(x_dict, adj_t_dict)
             assert isinstance(out2, dict) and len(out2) == 2
-            for key in x_dict.keys():
+            for key in x_dict:
                 assert torch.allclose(out1[key], out2[key], atol=1e-6)
 
     model = Net3()
@@ -426,7 +425,7 @@ def test_to_hetero_and_rgcn_equal_output():
     for i, edge_type in enumerate(edge_types):
         weight = model.conv['__'.join(edge_type)].lin.weight
         weight.data = conv.weight[i].data.t()
-    for i, node_type in enumerate(node_types):
+    for node_type in node_types:
         model.lin[node_type].weight.data = conv.root.data.t()
         model.lin[node_type].bias.data = conv.bias.data
 

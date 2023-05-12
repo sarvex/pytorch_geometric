@@ -110,7 +110,7 @@ class AffinityMixin:
                 By default, will affinitize to cores starting at :obj:`cpu0`.
                 (default: :obj:`node0_cores[:num_workers]`)
         """
-        if not self.num_workers > 0:
+        if self.num_workers <= 0:
             raise ValueError(
                 f"'enable_cpu_affinity' should be used with at least one "
                 f"worker (got {self.num_workers})")

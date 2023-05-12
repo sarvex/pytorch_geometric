@@ -20,5 +20,5 @@ def test_mean_subtraction_norm():
 
     out = norm(x, batch)
     assert out.size() == (6, 16)
-    assert torch.allclose(out[0:2].mean(), torch.tensor(0.), atol=1e-6)
-    assert torch.allclose(out[0:2].mean(), torch.tensor(0.), atol=1e-6)
+    assert torch.allclose(out[:2].mean(), torch.tensor(0.), atol=1e-6)
+    assert torch.allclose(out[:2].mean(), torch.tensor(0.), atol=1e-6)

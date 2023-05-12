@@ -13,12 +13,8 @@ from torch_geometric.testing import onlyNeighborSampler
 
 
 def test_dataloader_with_imbalanced_sampler():
-    data_list: List[Data] = []
-    for _ in range(10):
-        data_list.append(Data(num_nodes=10, y=0))
-    for _ in range(90):
-        data_list.append(Data(num_nodes=10, y=1))
-
+    data_list: List[Data] = [Data(num_nodes=10, y=0) for _ in range(10)]
+    data_list.extend(Data(num_nodes=10, y=1) for _ in range(90))
     torch.manual_seed(12345)
     sampler = ImbalancedSampler(data_list)
     loader = DataLoader(data_list, batch_size=10, sampler=sampler)

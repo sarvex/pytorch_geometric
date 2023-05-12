@@ -133,13 +133,6 @@ class InMemoryDataset(Dataset, ABC):
     def data(self) -> Any:
         msg1 = ("It is not recommended to directly access the internal "
                 "storage format `data` of an 'InMemoryDataset'.")
-        msg2 = ("The given 'InMemoryDataset' only references a subset of "
-                "examples of the full dataset, but 'data' will contain "
-                "information of the full dataset.")
-        msg3 = ("The data of the dataset is already cached, so any "
-                "modifications to `data` will not be reflected when accessing "
-                "its elements. Clearing the cache now by removing all "
-                "elements in `dataset._data_list`.")
         msg4 = ("If you are absolutely certain what you are doing, access the "
                 "internal storage via `InMemoryDataset._data` instead to "
                 "suppress this warning. Alternatively, you can access stacked "
@@ -148,8 +141,15 @@ class InMemoryDataset(Dataset, ABC):
 
         msg = msg1
         if self._indices is not None:
+            msg2 = ("The given 'InMemoryDataset' only references a subset of "
+                    "examples of the full dataset, but 'data' will contain "
+                    "information of the full dataset.")
             msg += f' {msg2}'
         if self._data_list is not None:
+            msg3 = ("The data of the dataset is already cached, so any "
+                    "modifications to `data` will not be reflected when accessing "
+                    "its elements. Clearing the cache now by removing all "
+                    "elements in `dataset._data_list`.")
             msg += f' {msg3}'
             self._data_list = None
         msg += f' {msg4}'
@@ -168,9 +168,8 @@ class InMemoryDataset(Dataset, ABC):
         if isinstance(data, Data) and key in data:
             if self._indices is None and data.__inc__(key, data[key]) == 0:
                 return data[key]
-            else:
-                data_list = [self.get(i) for i in self.indices()]
-                return Batch.from_data_list(data_list)[key]
+            data_list = [self.get(i) for i in self.indices()]
+            return Batch.from_data_list(data_list)[key]
 
         raise AttributeError(f"'{self.__class__.__name__}' object has no "
                              f"attribute '{key}'")
@@ -179,10 +178,8 @@ class InMemoryDataset(Dataset, ABC):
 def nested_iter(node: Union[Mapping, Sequence]) -> Iterable:
     if isinstance(node, Mapping):
         for key, value in node.items():
-            for inner_key, inner_value in nested_iter(value):
-                yield inner_key, inner_value
+            yield from nested_iter(value)
     elif isinstance(node, Sequence):
-        for i, inner_value in enumerate(node):
-            yield i, inner_value
+        yield from enumerate(node)
     else:
         yield None, node

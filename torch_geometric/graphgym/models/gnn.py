@@ -67,7 +67,7 @@ class GNNStackStage(nn.Module):
             else:
                 d_in = dim_in if i == 0 else dim_out
             layer = GNNLayer(d_in, dim_out)
-            self.add_module('layer{}'.format(i), layer)
+            self.add_module(f'layer{i}', layer)
 
     def forward(self, batch):
         for i, layer in enumerate(self.children()):

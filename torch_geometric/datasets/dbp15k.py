@@ -44,7 +44,7 @@ class DBP15K(InMemoryDataset):
     def __init__(self, root: str, pair: str,
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None):
-        assert pair in ['en_zh', 'en_fr', 'en_ja', 'zh_en', 'fr_en', 'ja_en']
+        assert pair in {'en_zh', 'en_fr', 'en_ja', 'zh_en', 'fr_en', 'ja_en'}
         self.pair = pair
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -67,7 +67,7 @@ class DBP15K(InMemoryDataset):
     def process(self):
         embs = {}
         with open(osp.join(self.raw_dir, 'sub.glove.300d'), 'r') as f:
-            for i, line in enumerate(f):
+            for line in f:
                 info = line.strip().split(' ')
                 if len(info) > 300:
                     embs[info[0]] = torch.tensor([float(x) for x in info[1:]])
@@ -123,7 +123,7 @@ class DBP15K(InMemoryDataset):
         edge_index, rel = sort_edge_index(edge_index, rel)
 
         xs = [None for _ in range(idx.size(0))]
-        for i in x_dict.keys():
+        for i in x_dict:
             xs[assoc[i]] = x_dict[i]
         x = torch.nn.utils.rnn.pad_sequence(xs, batch_first=True)
 

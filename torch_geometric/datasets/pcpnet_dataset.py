@@ -82,7 +82,7 @@ class PCPNetDataset(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
     ):
 
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
 
         if split == 'train':
             assert category in self.category_files_train.keys()
@@ -108,7 +108,7 @@ class PCPNetDataset(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> str:
-        return self.split + '_' + self.category + '.pt'
+        return f'{self.split}_{self.category}.pt'
 
     def download(self):
         path = download_url(self.url, self.raw_dir)
@@ -121,10 +121,10 @@ class PCPNetDataset(InMemoryDataset):
             filenames = f.read().split('\n')[:-1]
         data_list = []
         for filename in filenames:
-            pos_path = osp.join(self.raw_dir, filename + '.xyz')
-            normal_path = osp.join(self.raw_dir, filename + '.normals')
-            curv_path = osp.join(self.raw_dir, filename + '.curv')
-            idx_path = osp.join(self.raw_dir, filename + '.pidx')
+            pos_path = osp.join(self.raw_dir, f'{filename}.xyz')
+            normal_path = osp.join(self.raw_dir, f'{filename}.normals')
+            curv_path = osp.join(self.raw_dir, f'{filename}.curv')
+            idx_path = osp.join(self.raw_dir, f'{filename}.pidx')
             pos = read_txt_array(pos_path)
             normals = read_txt_array(normal_path)
             curv = read_txt_array(curv_path)

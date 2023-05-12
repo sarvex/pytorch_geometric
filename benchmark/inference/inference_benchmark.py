@@ -27,10 +27,7 @@ supported_sets = {
 @torch.no_grad()
 def full_batch_inference(model, data):
     model.eval()
-    if hasattr(data, 'adj_t'):
-        edge_index = data.adj_t
-    else:
-        edge_index = data.edge_index
+    edge_index = data.adj_t if hasattr(data, 'adj_t') else data.edge_index
     return model(data.x, edge_index)
 
 
@@ -53,7 +50,7 @@ def run(args: argparse.ArgumentParser):
                                                      args.bf16)
             dataset, num_classes, transformation = result
         data = dataset.to(device)
-        hetero = True if dataset_name == 'ogbn-mag' else False
+        hetero = dataset_name == 'ogbn-mag'
         mask = ('paper', None) if dataset_name == 'ogbn-mag' else None
         _, _, test_mask = get_split_masks(data, dataset_name)
         degree = None

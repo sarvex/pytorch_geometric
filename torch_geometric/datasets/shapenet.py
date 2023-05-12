@@ -210,7 +210,7 @@ class ShapeNet(InMemoryDataset):
                     for name in json.load(f)
                 ]  # Removing first directory.
             data_list = self.process_filenames(filenames)
-            if split == 'train' or split == 'val':
+            if split in ['train', 'val']:
                 trainval += data_list
             torch.save(self.collate(data_list), self.processed_paths[i])
         torch.save(self.collate(trainval), self.processed_paths[3])

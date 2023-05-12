@@ -35,7 +35,7 @@ def test_get_prediction(hetero_data):
 
 
 @pytest.mark.parametrize('target', [None, torch.randn(2)])
-@pytest.mark.parametrize('explanation_type', [x for x in ExplanationType])
+@pytest.mark.parametrize('explanation_type', list(ExplanationType))
 def test_forward(hetero_data, target, explanation_type):
     model = DummyModel()
 
@@ -120,9 +120,8 @@ def test_topk_threshold(hetero_data, threshold_value, threshold_type,
         for mask in explanation.collect(key).values():
             if threshold_type == 'topk':
                 assert (mask > 0).sum() == min(mask.numel(), threshold_value)
-                assert ((mask == 0).sum() == mask.numel() -
-                        min(mask.numel(), threshold_value))
             else:
                 assert (mask == 1).sum() == min(mask.numel(), threshold_value)
-                assert ((mask == 0).sum() == mask.numel() -
-                        min(mask.numel(), threshold_value))
+
+            assert ((mask == 0).sum() == mask.numel() -
+                    min(mask.numel(), threshold_value))

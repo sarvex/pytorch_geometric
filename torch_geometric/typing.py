@@ -53,7 +53,7 @@ except (ImportError, OSError) as e:
     WITH_TORCH_SPARSE = False
 
     class SparseStorage:
-        def __init__(*args, **kwargs):
+        def __init__(self, **kwargs):
             raise ImportError("'SparseStorage' requires 'torch-sparse'")
 
     class SparseTensor:
@@ -70,14 +70,7 @@ except (ImportError, OSError) as e:
             raise ImportError("'SparseTensor' requires 'torch-sparse'")
 
         @classmethod
-        def from_edge_index(
-            self,
-            edge_index: Tensor,
-            edge_attr: Optional[Tensor] = None,
-            sparse_sizes: Optional[Tuple[Optional[int], Optional[int]]] = None,
-            is_sorted: bool = False,
-            trust_data: bool = False,
-        ) -> 'SparseTensor':
+        def from_edge_index(cls, edge_index: Tensor, edge_attr: Optional[Tensor] = None, sparse_sizes: Optional[Tuple[Optional[int], Optional[int]]] = None, is_sorted: bool = False, trust_data: bool = False) -> 'SparseTensor':
             raise ImportError("'SparseTensor' requires 'torch-sparse'")
 
         def size(self, dim: int) -> int:

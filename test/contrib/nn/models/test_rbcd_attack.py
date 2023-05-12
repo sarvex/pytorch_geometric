@@ -67,10 +67,7 @@ def test_prbcd_attack(model, budget, loss, is_undirected, with_early_stopping):
         assert pert.size() in [(2, 0), (2, 1)]
 
         if pert.size(1):
-            if is_undirected:
-                possible_m = [m - 2, m + 2]
-            else:
-                possible_m = [m - 1, m + 1]
+            possible_m = [m - 2, m + 2] if is_undirected else [m - 1, m + 1]
         else:
             possible_m = [m]
         assert pert_edge_index.size(1) in possible_m
@@ -103,8 +100,5 @@ def test_grbcd_attack(model, budget, is_undirected):
     if budget == 1:
         assert pert.size() == (2, 1)
 
-        if is_undirected:
-            possible_m = [m - 2, m + 2]
-        else:
-            possible_m = [m - 1, m + 1]
+        possible_m = [m - 2, m + 2] if is_undirected else [m - 1, m + 1]
         assert pert_edge_index.size(1) in possible_m

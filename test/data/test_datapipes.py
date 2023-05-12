@@ -24,7 +24,7 @@ def test_dataset_adapter(dataset_adapter):
 
     # Test sharding:
     dataset_adapter.apply_sharding(2, 0)
-    assert len([data for data in dataset_adapter]) == 2
+    assert len(list(dataset_adapter)) == 2
 
 
 def test_datapipe_batch_graphs(dataset_adapter):

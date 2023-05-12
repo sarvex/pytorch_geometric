@@ -16,28 +16,27 @@ class DynamicInheritance(type):
     # A meta class that sets the base class of a `Batch` object, e.g.:
     # * `Batch(Data)` in case `Data` objects are batched together
     # * `Batch(HeteroData)` in case `HeteroData` objects are batched together
-    def __call__(cls, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         base_cls = kwargs.pop('_base_cls', Data)
 
         if issubclass(base_cls, Batch):
             new_cls = base_cls
         else:
-            name = f'{base_cls.__name__}{cls.__name__}'
+            name = f'{base_cls.__name__}{self.__name__}'
 
-            # NOTE `MetaResolver` is necessary to resolve metaclass conflict
-            # problems between `DynamicInheritance` and the metaclass of
-            # `base_cls`. In particular, it creates a new common metaclass
-            # from the defined metaclasses.
-            class MetaResolver(type(cls), type(base_cls)):
+
+
+            class MetaResolver(type(self), type(base_cls)):
                 pass
 
+
             if name not in globals():
-                globals()[name] = MetaResolver(name, (cls, base_cls), {})
+                globals()[name] = MetaResolver(name, (self, base_cls), {})
             new_cls = globals()[name]
 
         params = list(inspect.signature(base_cls.__init__).parameters.items())
         for i, (k, v) in enumerate(params[1:]):
-            if k == 'args' or k == 'kwargs':
+            if k in ['args', 'kwargs']:
                 continue
             if i < len(args) or k in kwargs:
                 continue
@@ -100,7 +99,7 @@ class Batch(metaclass=DynamicInheritance):
                 ("Cannot reconstruct 'Data' object from 'Batch' because "
                  "'Batch' was not created via 'Batch.from_data_list()'"))
 
-        data = separate(
+        return separate(
             cls=self.__class__.__bases__[-1],
             batch=self,
             idx=idx,
@@ -108,8 +107,6 @@ class Batch(metaclass=DynamicInheritance):
             inc_dict=self._inc_dict,
             decrement=True,
         )
-
-        return data
 
     def index_select(self, idx: IndexType) -> List[BaseData]:
         r"""Creates a subset of :class:`~torch_geometric.data.Data` or
@@ -136,10 +133,7 @@ class Batch(metaclass=DynamicInheritance):
         elif isinstance(idx, np.ndarray) and idx.dtype == bool:
             idx = idx.flatten().nonzero()[0].flatten().tolist()
 
-        elif isinstance(idx, Sequence) and not isinstance(idx, str):
-            pass
-
-        else:
+        elif not isinstance(idx, Sequence) or isinstance(idx, str):
             raise IndexError(
                 f"Only slices (':'), list, tuples, torch.tensor and "
                 f"np.ndarray of dtype long or bool are valid indices (got "

@@ -92,7 +92,7 @@ class ModelNet(InMemoryDataset):
         pre_transform: Optional[Callable] = None,
         pre_filter: Optional[Callable] = None,
     ):
-        assert name in ['10', '40']
+        assert name in {'10', '40'}
         self.name = name
         super().__init__(root, transform, pre_transform, pre_filter)
         path = self.processed_paths[0] if train else self.processed_paths[1]

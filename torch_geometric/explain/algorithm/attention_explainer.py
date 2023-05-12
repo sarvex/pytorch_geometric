@@ -66,7 +66,7 @@ class AttentionExplainer(ExplainerAlgorithm):
         for handle in hook_handles:  # Remove hooks:
             handle.remove()
 
-        if len(alphas) == 0:
+        if not alphas:
             raise ValueError("Could not collect any attention coefficients. "
                              "Please ensure that your model is using "
                              "attention-based GNN layers.")

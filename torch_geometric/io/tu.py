@@ -96,7 +96,7 @@ def cat(seq):
     seq = [item for item in seq if item is not None]
     seq = [item for item in seq if item.numel() > 0]
     seq = [item.unsqueeze(-1) if item.dim() == 1 else item for item in seq]
-    return torch.cat(seq, dim=-1) if len(seq) > 0 else None
+    return torch.cat(seq, dim=-1) if seq else None
 
 
 def split(data, batch):

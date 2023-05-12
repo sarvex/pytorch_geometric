@@ -60,10 +60,11 @@ def test_fake_hetero_dataset(num_graphs, edge_dim, task):
     for store in data.node_stores:
         assert store.num_features > 0
 
-        if task == 'node' or (task == 'auto' and num_graphs == 1):
-            if store._key == 'v0':
-                assert store.y.min() >= 0 and store.y.max() < 10
-                assert store.y.size() == (store.num_nodes, )
+        if (
+            task == 'node' or (task == 'auto' and num_graphs == 1)
+        ) and store._key == 'v0':
+            assert store.y.min() >= 0 and store.y.max() < 10
+            assert store.y.size() == (store.num_nodes, )
 
     for store in data.edge_stores:
         if edge_dim == 0:

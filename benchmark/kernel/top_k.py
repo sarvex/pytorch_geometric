@@ -16,12 +16,12 @@ class TopK(torch.nn.Module):
         self.conv1 = GraphConv(dataset.num_features, hidden, aggr='mean')
         self.convs = torch.nn.ModuleList()
         self.pools = torch.nn.ModuleList()
-        self.convs.extend([
-            GraphConv(hidden, hidden, aggr='mean')
-            for i in range(num_layers - 1)
-        ])
+        self.convs.extend(
+            [GraphConv(hidden, hidden, aggr='mean') for _ in range(num_layers - 1)]
+        )
         self.pools.extend(
-            [TopKPooling(hidden, ratio) for i in range((num_layers) // 2)])
+            [TopKPooling(hidden, ratio) for _ in range((num_layers) // 2)]
+        )
         self.jump = JumpingKnowledge(mode='cat')
         self.lin1 = Linear(num_layers * hidden, hidden)
         self.lin2 = Linear(hidden, dataset.num_classes)

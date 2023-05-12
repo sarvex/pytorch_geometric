@@ -155,41 +155,40 @@ class HGBDataset(InMemoryDataset):
             if not torch.allclose(edge_weight, torch.ones_like(edge_weight)):
                 data[e_type].edge_weight = edge_weight
 
-        # Node classification:
-        if self.name in ['acm', 'dblp', 'freebase', 'imdb']:
-            with open(self.raw_paths[3], 'r') as f:  # `label.dat`
-                train_ys = [v.split('\t') for v in f.read().split('\n')[:-1]]
-            with open(self.raw_paths[4], 'r') as f:  # `label.dat.test`
-                test_ys = [v.split('\t') for v in f.read().split('\n')[:-1]]
-            for y in train_ys:
-                n_id, n_type = mapping_dict[int(y[0])], n_types[int(y[2])]
-
-                if not hasattr(data[n_type], 'y'):
-                    num_nodes = data[n_type].num_nodes
-                    if self.name in ['imdb']:  # multi-label
-                        data[n_type].y = torch.zeros((num_nodes, num_classes))
-                    else:
-                        data[n_type].y = torch.full((num_nodes, ), -1).long()
-                    data[n_type].train_mask = torch.zeros(num_nodes).bool()
-                    data[n_type].test_mask = torch.zeros(num_nodes).bool()
-
-                if data[n_type].y.dim() > 1:  # multi-label
-                    for v in y[3].split(','):
-                        data[n_type].y[n_id, int(v)] = 1
-                else:
-                    data[n_type].y[n_id] = int(y[3])
-                data[n_type].train_mask[n_id] = True
-            for y in test_ys:
-                n_id, n_type = mapping_dict[int(y[0])], n_types[int(y[2])]
-                if data[n_type].y.dim() > 1:  # multi-label
-                    for v in y[3].split(','):
-                        data[n_type].y[n_id, int(v)] = 1
-                else:
-                    data[n_type].y[n_id] = int(y[3])
-                data[n_type].test_mask[n_id] = True
-
-        else:  # Link prediction:
+        if self.name not in ['acm', 'dblp', 'freebase', 'imdb']:
             raise NotImplementedError
+
+        with open(self.raw_paths[3], 'r') as f:  # `label.dat`
+            train_ys = [v.split('\t') for v in f.read().split('\n')[:-1]]
+        with open(self.raw_paths[4], 'r') as f:  # `label.dat.test`
+            test_ys = [v.split('\t') for v in f.read().split('\n')[:-1]]
+        for y in train_ys:
+            n_id, n_type = mapping_dict[int(y[0])], n_types[int(y[2])]
+
+            if not hasattr(data[n_type], 'y'):
+                num_nodes = data[n_type].num_nodes
+                data[n_type].y = (
+                    torch.zeros((num_nodes, num_classes))
+                    if self.name in ['imdb']
+                    else torch.full((num_nodes,), -1).long()
+                )
+                data[n_type].train_mask = torch.zeros(num_nodes).bool()
+                data[n_type].test_mask = torch.zeros(num_nodes).bool()
+
+            if data[n_type].y.dim() > 1:  # multi-label
+                for v in y[3].split(','):
+                    data[n_type].y[n_id, int(v)] = 1
+            else:
+                data[n_type].y[n_id] = int(y[3])
+            data[n_type].train_mask[n_id] = True
+        for y in test_ys:
+            n_id, n_type = mapping_dict[int(y[0])], n_types[int(y[2])]
+            if data[n_type].y.dim() > 1:  # multi-label
+                for v in y[3].split(','):
+                    data[n_type].y[n_id, int(v)] = 1
+            else:
+                data[n_type].y[n_id] = int(y[3])
+            data[n_type].test_mask[n_id] = True
 
         if self.pre_transform is not None:
             data = self.pre_transform(data)

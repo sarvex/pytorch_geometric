@@ -49,9 +49,13 @@ def train():
 def test():
     model.eval()
     z, _, _ = model(data.x, data.edge_index)
-    acc = model.test(z[data.train_mask], data.y[data.train_mask],
-                     z[data.test_mask], data.y[data.test_mask], max_iter=150)
-    return acc
+    return model.test(
+        z[data.train_mask],
+        data.y[data.train_mask],
+        z[data.test_mask],
+        data.y[data.test_mask],
+        max_iter=150,
+    )
 
 
 for epoch in range(1, 301):

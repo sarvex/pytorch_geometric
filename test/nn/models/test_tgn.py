@@ -72,7 +72,7 @@ def test_tgn():
     post_msg = torch.randn(2, 16)
     memory.update_state(post_src, post_dst, post_t, post_msg)
     post_z, post_last_update = memory(all_n_id)
-    assert torch.allclose(z[0:3], post_z[0:3])
+    assert torch.allclose(z[:3], post_z[:3])
     assert torch.equal(post_last_update, torch.tensor([4, 6, 8, 10, 10]))
 
     memory.reset_state()

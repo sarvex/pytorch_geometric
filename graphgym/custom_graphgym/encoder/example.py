@@ -36,16 +36,15 @@ class ExampleEdgeEncoder(torch.nn.Module):
         self.bond_embedding_list = torch.nn.ModuleList()
         full_bond_feature_dims = get_bond_feature_dims()
 
-        for i, dim in enumerate(full_bond_feature_dims):
+        for dim in full_bond_feature_dims:
             emb = torch.nn.Embedding(dim, emb_dim)
             torch.nn.init.xavier_uniform_(emb.weight.data)
             self.bond_embedding_list.append(emb)
 
     def forward(self, batch):
-        bond_embedding = 0
-        for i in range(batch.edge_feature.shape[1]):
-            bond_embedding += \
-                self.bond_embedding_list[i](batch.edge_attr[:, i])
-
+        bond_embedding = sum(
+            self.bond_embedding_list[i](batch.edge_attr[:, i])
+            for i in range(batch.edge_feature.shape[1])
+        )
         batch.edge_attr = bond_embedding
         return batch

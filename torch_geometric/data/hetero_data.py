@@ -213,7 +213,7 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
         info2 = [size_repr(k, v, 2) for k, v in self._node_store_dict.items()]
         info3 = [size_repr(k, v, 2) for k, v in self._edge_store_dict.items()]
         info = ',\n'.join(info1 + info2 + info3)
-        info = f'\n{info}\n' if len(info) > 0 else info
+        info = f'\n{info}\n' if info != "" else info
         return f'{self.__class__.__name__}({info})'
 
     def stores_as(self, data: 'HeteroData'):
@@ -386,14 +386,14 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
                     f"'num_nodes' is undefined in node type '{dst}' of "
                     f"'{cls_name}'", raise_on_error)
 
-            if 'edge_index' in store:
-                if (store.edge_index.dim() != 2
-                        or store.edge_index.size(0) != 2):
-                    status = False
-                    warn_or_raise(
-                        f"'edge_index' of edge type {edge_type} needs to be "
-                        f"of shape [2, num_edges] in '{cls_name}' (found "
-                        f"{store.edge_index.size()})", raise_on_error)
+            if 'edge_index' in store and (
+                store.edge_index.dim() != 2 or store.edge_index.size(0) != 2
+            ):
+                status = False
+                warn_or_raise(
+                    f"'edge_index' of edge type {edge_type} needs to be "
+                    f"of shape [2, num_edges] in '{cls_name}' (found "
+                    f"{store.edge_index.size()})", raise_on_error)
 
             if 'edge_index' in store and store.edge_index.numel() > 0:
                 if store.edge_index.min() < 0:
@@ -462,7 +462,7 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
             if len(edge_types) == 1:
                 args = edge_types[0]
                 return args
-            elif len(edge_types) == 0:
+            elif not edge_types:
                 args = (args[0], DEFAULT_REL, args[1])
                 return args
 
@@ -500,12 +500,13 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
 
             This is equivalent to writing :obj:`data.x_dict`.
         """
-        mapping = {}
-        for subtype, store in chain(self._node_store_dict.items(),
-                                    self._edge_store_dict.items()):
-            if hasattr(store, key):
-                mapping[subtype] = getattr(store, key)
-        return mapping
+        return {
+            subtype: getattr(store, key)
+            for subtype, store in chain(
+                self._node_store_dict.items(), self._edge_store_dict.items()
+            )
+            if hasattr(store, key)
+        }
 
     def _check_type_name(self, name: str):
         if '__' in name:
@@ -717,8 +718,8 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
         for edge_type in self.edge_types:
             if edge_type not in edge_types:
                 del data[edge_type]
-        node_types = set(e[0] for e in edge_types)
-        node_types |= set(e[-1] for e in edge_types)
+        node_types = {e[0] for e in edge_types}
+        node_types |= {e[-1] for e in edge_types}
         for node_type in self.node_types:
             if node_type not in node_types:
                 del data[node_type]
@@ -872,8 +873,7 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
         if not attr.is_set('index'):
             attr.index = None
 
-        out = self._node_store_dict.get(attr.group_name, None)
-        if out:
+        if out := self._node_store_dict.get(attr.group_name, None):
             # Group name exists, handle index or create new attribute name:
             val = getattr(out, attr.attr_name, None)
             if val is not None:
@@ -910,9 +910,11 @@ class HeteroData(BaseData, FeatureStore, GraphStore):
     def get_all_tensor_attrs(self) -> List[TensorAttr]:
         out = []
         for group_name, group in self.node_items():
-            for attr_name in group:
-                if group.is_node_attr(attr_name):
-                    out.append(TensorAttr(group_name, attr_name))
+            out.extend(
+                TensorAttr(group_name, attr_name)
+                for attr_name in group
+                if group.is_node_attr(attr_name)
+            )
         return out
 
     # GraphStore interface ####################################################

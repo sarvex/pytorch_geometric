@@ -52,7 +52,7 @@ def _internal_num_nodes(
         if _matches_node_type(query, attr.group_name)
     ]
     if node_query:
-        if len(matching_attrs) > 0:
+        if matching_attrs:
             return feature_store.get_tensor_size(matching_attrs[0])[0]
     else:
         matching_src_attrs = [
@@ -61,7 +61,7 @@ def _internal_num_nodes(
         matching_dst_attrs = [
             attr for attr in matching_attrs if attr.group_name == query[-1]
         ]
-        if len(matching_src_attrs) > 0 and len(matching_dst_attrs) > 0:
+        if matching_src_attrs and matching_dst_attrs:
             return (feature_store.get_tensor_size(matching_src_attrs[0])[0],
                     feature_store.get_tensor_size(matching_dst_attrs[0])[0])
 

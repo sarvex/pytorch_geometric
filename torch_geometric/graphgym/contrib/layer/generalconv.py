@@ -64,13 +64,14 @@ class GeneralConvLayer(MessagePassing):
             x_self = torch.matmul(x, self.weight_self)
         x = torch.matmul(x, self.weight)
 
-        if self.cached and self.cached_result is not None:
-            if edge_index.size(1) != self.cached_num_edges:
-                raise RuntimeError(
-                    'Cached {} number of edges, but found {}. Please '
-                    'disable the caching behavior of this layer by removing '
-                    'the `cached=True` argument in its constructor.'.format(
-                        self.cached_num_edges, edge_index.size(1)))
+        if (
+            self.cached
+            and self.cached_result is not None
+            and edge_index.size(1) != self.cached_num_edges
+        ):
+            raise RuntimeError(
+                f'Cached {self.cached_num_edges} number of edges, but found {edge_index.size(1)}. Please disable the caching behavior of this layer by removing the `cached=True` argument in its constructor.'
+            )
 
         if not self.cached or self.cached_result is None:
             self.cached_num_edges = edge_index.size(1)
@@ -92,8 +93,7 @@ class GeneralConvLayer(MessagePassing):
         elif cfg.gnn.self_msg == 'concat':
             return x_msg + x_self
         else:
-            raise ValueError('self_msg {} not defined'.format(
-                cfg.gnn.self_msg))
+            raise ValueError(f'self_msg {cfg.gnn.self_msg} not defined')
 
     def message(self, x_j, norm, edge_feature):
         if edge_feature is None:
@@ -109,8 +109,7 @@ class GeneralConvLayer(MessagePassing):
         return aggr_out
 
     def __repr__(self):
-        return '{}({}, {})'.format(self.__class__.__name__, self.in_channels,
-                                   self.out_channels)
+        return f'{self.__class__.__name__}({self.in_channels}, {self.out_channels})'
 
 
 class GeneralEdgeConvLayer(MessagePassing):
@@ -167,13 +166,14 @@ class GeneralEdgeConvLayer(MessagePassing):
         return edge_index, deg_inv_sqrt[row] * edge_weight * deg_inv_sqrt[col]
 
     def forward(self, x, edge_index, edge_weight=None, edge_feature=None):
-        if self.cached and self.cached_result is not None:
-            if edge_index.size(1) != self.cached_num_edges:
-                raise RuntimeError(
-                    'Cached {} number of edges, but found {}. Please '
-                    'disable the caching behavior of this layer by removing '
-                    'the `cached=True` argument in its constructor.'.format(
-                        self.cached_num_edges, edge_index.size(1)))
+        if (
+            self.cached
+            and self.cached_result is not None
+            and edge_index.size(1) != self.cached_num_edges
+        ):
+            raise RuntimeError(
+                f'Cached {self.cached_num_edges} number of edges, but found {edge_index.size(1)}. Please disable the caching behavior of this layer by removing the `cached=True` argument in its constructor.'
+            )
 
         if not self.cached or self.cached_result is None:
             self.cached_num_edges = edge_index.size(1)
@@ -190,11 +190,11 @@ class GeneralEdgeConvLayer(MessagePassing):
         x_msg = self.propagate(edge_index, x=x, norm=norm,
                                edge_feature=edge_feature)
 
-        if cfg.gnn.self_msg == 'concat':
+        if cfg.gnn.self_msg == 'add':
+            return x + x_msg
+        elif cfg.gnn.self_msg == 'concat':
             x_self = self.linear_self(x)
             return x_self + x_msg
-        elif cfg.gnn.self_msg == 'add':
-            return x + x_msg
         else:
             return x_msg
 
@@ -212,5 +212,4 @@ class GeneralEdgeConvLayer(MessagePassing):
         return aggr_out
 
     def __repr__(self):
-        return '{}({}, {})'.format(self.__class__.__name__, self.in_channels,
-                                   self.out_channels)
+        return f'{self.__class__.__name__}({self.in_channels}, {self.out_channels})'

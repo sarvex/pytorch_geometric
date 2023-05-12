@@ -45,10 +45,10 @@ def train_teacher():
 def test_teacher():
     gnn.eval()
     pred = gnn(data.x, data.edge_index).argmax(dim=-1)
-    accs = []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        accs.append(int((pred[mask] == data.y[mask]).sum()) / int(mask.sum()))
-    return accs
+    return [
+        int((pred[mask] == data.y[mask]).sum()) / int(mask.sum())
+        for _, mask in data('train_mask', 'val_mask', 'test_mask')
+    ]
 
 
 print('Training Teacher GNN:')
@@ -80,10 +80,10 @@ def train_student():
 def test_student():
     mlp.eval()
     pred = mlp(data.x).argmax(dim=-1)
-    accs = []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        accs.append(int((pred[mask] == data.y[mask]).sum()) / int(mask.sum()))
-    return accs
+    return [
+        int((pred[mask] == data.y[mask]).sum()) / int(mask.sum())
+        for _, mask in data('train_mask', 'val_mask', 'test_mask')
+    ]
 
 
 print('Training Student MLP:')

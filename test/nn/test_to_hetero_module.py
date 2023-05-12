@@ -25,7 +25,7 @@ def test_to_hetero_linear(LinearCls):
     out = module(x, type_vec)
     assert out.size() == (9, 32)
 
-    assert torch.allclose(out_dict['1'], out[0:5])
+    assert torch.allclose(out_dict['1'], out[:5])
     assert torch.allclose(out_dict['2'], out[5:9])
 
 
@@ -55,5 +55,5 @@ def test_to_hetero_message_passing():
     out = module(x, edge_index, node_type, edge_type)
     assert out.size() == (9, 32)
 
-    assert torch.allclose(out_dict['1'], out[0:5])
+    assert torch.allclose(out_dict['1'], out[:5])
     assert torch.allclose(out_dict['2'], out[5:9])

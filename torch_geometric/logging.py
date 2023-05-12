@@ -27,9 +27,7 @@ def log(**kwargs):
     def _map(value: Any) -> str:
         if isinstance(value, int) and not isinstance(value, bool):
             return f'{value:03d}'
-        if isinstance(value, float):
-            return f'{value:.4f}'
-        return value
+        return f'{value:.4f}' if isinstance(value, float) else value
 
     print(', '.join(f'{key}: {_map(value)}' for key, value in kwargs.items()))
 

@@ -75,7 +75,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 def train(epoch):
     model.train()
 
-    pbar = tqdm(total=int(len(train_loader.dataset)))
+    pbar = tqdm(total=len(train_loader.dataset))
     pbar.set_description(f'Epoch {epoch:02d}')
 
     total_loss = total_correct = total_examples = 0
@@ -102,10 +102,10 @@ def test():
     y_hat = model.inference(data.x, subgraph_loader).argmax(dim=-1)
     y = data.y.to(y_hat.device)
 
-    accs = []
-    for mask in [data.train_mask, data.val_mask, data.test_mask]:
-        accs.append(int((y_hat[mask] == y[mask]).sum()) / int(mask.sum()))
-    return accs
+    return [
+        int((y_hat[mask] == y[mask]).sum()) / int(mask.sum())
+        for mask in [data.train_mask, data.val_mask, data.test_mask]
+    ]
 
 
 for epoch in range(1, 11):

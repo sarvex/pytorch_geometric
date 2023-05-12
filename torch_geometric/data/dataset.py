@@ -156,7 +156,7 @@ class Dataset(torch.utils.data.Dataset, ABC):
         # maximum number of classes. Importantly, in rare cases, `__getitem__`
         # may produce a tuple of data objects (e.g., when used in combination
         # with `RandomLinkSplit`, so we take care of this case here as well:
-        data_list = _get_flattened_data_list([data for data in self])
+        data_list = _get_flattened_data_list(list(self))
         y = torch.cat([data.y for data in data_list if 'y' in data], dim=0)
 
         # Do not fill cache for `InMemoryDataset`:
@@ -251,16 +251,15 @@ class Dataset(torch.utils.data.Dataset, ABC):
         In case :obj:`idx` is a slicing object, *e.g.*, :obj:`[2:5]`, a list, a
         tuple, or a :obj:`torch.Tensor` or :obj:`np.ndarray` of type long or
         bool, will return a subset of the dataset at the specified indices."""
-        if (isinstance(idx, (int, np.integer))
-                or (isinstance(idx, Tensor) and idx.dim() == 0)
-                or (isinstance(idx, np.ndarray) and np.isscalar(idx))):
-
-            data = self.get(self.indices()[idx])
-            data = data if self.transform is None else self.transform(data)
-            return data
-
-        else:
+        if (
+            not isinstance(idx, (int, np.integer))
+            and (not isinstance(idx, Tensor) or idx.dim() != 0)
+            and (not isinstance(idx, np.ndarray) or not np.isscalar(idx))
+        ):
             return self.index_select(idx)
+        data = self.get(self.indices()[idx])
+        data = data if self.transform is None else self.transform(data)
+        return data
 
     def index_select(self, idx: IndexType) -> 'Dataset':
         r"""Creates a subset of the dataset from specified indices :obj:`idx`.
@@ -312,7 +311,7 @@ class Dataset(torch.utils.data.Dataset, ABC):
         """
         perm = torch.randperm(len(self))
         dataset = self.index_select(perm)
-        return (dataset, perm) if return_perm is True else dataset
+        return (dataset, perm) if return_perm else dataset
 
     def __repr__(self) -> str:
         arg_repr = str(len(self)) if len(self) > 1 else ''
@@ -323,9 +322,9 @@ class Dataset(torch.utils.data.Dataset, ABC):
         from torch_geometric.data.summary import Summary
         return Summary.from_dataset(self)
 
-    def print_summary(self):  # pragma: no cover
+    def print_summary(self):    # pragma: no cover
         r"""Prints summary statistics of the dataset to the console."""
-        print(str(self.get_summary()))
+        print(self.get_summary())
 
     def to_datapipe(self):
         r"""Converts the dataset into a :class:`torch.utils.data.DataPipe`.
@@ -360,7 +359,7 @@ def overrides_method(cls, method_name: str):
 
     out = False
     for base in cls.__bases__:
-        if base != Dataset and base != InMemoryDataset:
+        if base not in [Dataset, InMemoryDataset]:
             out |= overrides_method(base, method_name)
     return out
 
@@ -375,13 +374,11 @@ def to_list(value: Any) -> Sequence:
 def files_exist(files: List[str]) -> bool:
     # NOTE: We return `False` in case `files` is empty, leading to a
     # re-processing of files on every instantiation.
-    return len(files) != 0 and all([osp.exists(f) for f in files])
+    return len(files) != 0 and all(osp.exists(f) for f in files)
 
 
 def _repr(obj: Any) -> str:
-    if obj is None:
-        return 'None'
-    return re.sub('(<.*?)\\s.*(>)', r'\1\2', str(obj))
+    return 'None' if obj is None else re.sub('(<.*?)\\s.*(>)', r'\1\2', str(obj))
 
 
 def _get_flattened_data_list(data_list: List[Any]) -> List[BaseData]:

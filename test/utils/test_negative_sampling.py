@@ -37,14 +37,14 @@ def test_edge_index_to_vector_and_vice_versa():
     edge_index = torch.stack([row, col], dim=0)
 
     idx, population = edge_index_to_vector(edge_index, (N, N), bipartite=True)
-    assert population == N * N
+    assert population == N**2
     assert idx.tolist() == list(range(population))
     edge_index2 = vector_to_edge_index(idx, (N, N), bipartite=True)
     assert is_undirected(edge_index2)
     assert edge_index.tolist() == edge_index2.tolist()
 
     idx, population = edge_index_to_vector(edge_index, (N, N), bipartite=False)
-    assert population == N * N - N
+    assert population == N**2 - N
     assert idx.tolist() == list(range(population))
     mask = edge_index[0] != edge_index[1]  # Remove self-loops.
     edge_index2 = vector_to_edge_index(idx, (N, N), bipartite=False)

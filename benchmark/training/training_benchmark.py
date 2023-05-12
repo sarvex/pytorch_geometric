@@ -35,10 +35,7 @@ def train_homo(model, loader, optimizer, device, progress_bar=True, desc="",
     for batch in loader:
         optimizer.zero_grad()
         batch = batch.to(device)
-        if hasattr(batch, 'adj_t'):
-            edge_index = batch.adj_t
-        else:
-            edge_index = batch.edge_index
+        edge_index = batch.adj_t if hasattr(batch, 'adj_t') else batch.edge_index
         if not trim:
             out = model(batch.x, edge_index)
         else:

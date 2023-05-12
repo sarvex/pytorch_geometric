@@ -150,7 +150,7 @@ class HydroNet(InMemoryDataset):
         def is_valid_cluster(x):
             return isinstance(x, int) and x >= 3 and x <= 30
 
-        if not all([is_valid_cluster(x) for x in clusters]):
+        if not all(is_valid_cluster(x) for x in clusters):
             raise ValueError(
                 "Selected clusters must be an integer in the range [3, 30]")
 
@@ -285,11 +285,11 @@ class Partition(InMemoryDataset):
 
     @property
     def raw_file_names(self) -> List[str]:
-        return [self.name + ".zip"]
+        return [f"{self.name}.zip"]
 
     @property
     def processed_file_names(self) -> List[str]:
-        return [self.name + '.npz']
+        return [f'{self.name}.npz']
 
     def process(self):
         num_nodes = self.num_clusters * 3

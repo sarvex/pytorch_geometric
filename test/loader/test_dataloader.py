@@ -181,6 +181,4 @@ if __name__ == '__main__':
     for _ in range(2):
         print(f'Start loading {len(loader)} mini-batches ... ', end='')
         t = time.perf_counter()
-        for batch in loader:
-            pass
         print(f'Done! [{time.perf_counter() - t:.4f}s]')

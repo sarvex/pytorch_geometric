@@ -10,13 +10,13 @@ def test_to_nested_tensor():
     out = to_nested_tensor(x, batch=torch.tensor([0, 0, 1, 1, 1]))
     out = out.to_padded_tensor(padding=0)
     assert out.size() == (2, 3, 4, 3)
-    assert torch.allclose(out[0, :2], x[0:2])
+    assert torch.allclose(out[0, :2], x[:2])
     assert torch.allclose(out[1, :3], x[2:5])
 
     out = to_nested_tensor(x, ptr=torch.tensor([0, 2, 5]))
     out = out.to_padded_tensor(padding=0)
     assert out.size() == (2, 3, 4, 3)
-    assert torch.allclose(out[0, :2], x[0:2])
+    assert torch.allclose(out[0, :2], x[:2])
     assert torch.allclose(out[1, :3], x[2:5])
 
     out = to_nested_tensor(x)
@@ -42,7 +42,7 @@ def test_from_nested_tensor():
     nested = to_nested_tensor(x, batch=torch.tensor([0, 0, 1, 1, 1]))
     out = from_nested_tensor(nested)
     out += 1  # Increment in-place (which should increment `nested` as well).
-    assert torch.equal(nested.to_padded_tensor(padding=0)[0, :2], out[0:2])
+    assert torch.equal(nested.to_padded_tensor(padding=0)[0, :2], out[:2])
     assert torch.equal(nested.to_padded_tensor(padding=0)[1, :3], out[2:5])
 
 

@@ -118,10 +118,10 @@ class InfectionDataset(InMemoryDataset):
             raise ValueError(f"'max_path_length' needs to be positive "
                              f"(got {min(max_path_length)})")
 
-        data_list: List[Explanation] = []
-        for N, L in zip(num_infected_nodes, max_path_length):
-            data_list.append(self.get_graph(N, L))
-
+        data_list: List[Explanation] = [
+            self.get_graph(N, L)
+            for N, L in zip(num_infected_nodes, max_path_length)
+        ]
         self.data, self.slices = self.collate(data_list)
 
     def get_graph(self, num_infected_nodes: int,

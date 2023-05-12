@@ -77,7 +77,7 @@ class Entities(InMemoryDataset):
                  pre_transform: Optional[Callable] = None):
         self.name = name.lower()
         self.hetero = hetero
-        assert self.name in ['aifb', 'am', 'mutag', 'bgs']
+        assert self.name in {'aifb', 'am', 'mutag', 'bgs'}
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
@@ -144,28 +144,26 @@ class Entities(InMemoryDataset):
         edges = []
         for s, p, o in g.triples((None, None, None)):
             src, dst, rel = nodes_dict[s], nodes_dict[o], relations_dict[p]
-            edges.append([src, dst, 2 * rel])
-            edges.append([dst, src, 2 * rel + 1])
-
+            edges.extend(([src, dst, 2 * rel], [dst, src, 2 * rel + 1]))
         edges = torch.tensor(edges, dtype=torch.long).t().contiguous()
         _, perm = index_sort(N * R * edges[0] + R * edges[1] + edges[2])
         edges = edges[:, perm]
 
         edge_index, edge_type = edges[:2], edges[2]
 
-        if self.name == 'am':
-            label_header = 'label_cateogory'
-            nodes_header = 'proxy'
-        elif self.name == 'aifb':
+        if self.name == 'aifb':
             label_header = 'label_affiliation'
             nodes_header = 'person'
-        elif self.name == 'mutag':
-            label_header = 'label_mutagenic'
-            nodes_header = 'bond'
+        elif self.name == 'am':
+            label_header = 'label_cateogory'
+            nodes_header = 'proxy'
         elif self.name == 'bgs':
             label_header = 'label_lithogenesis'
             nodes_header = 'rock'
 
+        elif self.name == 'mutag':
+            label_header = 'label_mutagenic'
+            nodes_header = 'bond'
         labels_df = pd.read_csv(task_file, sep='\t')
         labels_set = set(labels_df[label_header].values.tolist())
         labels_dict = {lab: i for i, lab in enumerate(list(labels_set))}

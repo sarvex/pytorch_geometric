@@ -73,10 +73,7 @@ def read_ego(files: List[str], name: str) -> List[EgoData]:
         idx = pd.read_csv(feat_file, sep=' ', header=None, dtype=str,
                           usecols=[0]).squeeze()
 
-        idx_assoc = {}
-        for i, j in enumerate(idx):
-            idx_assoc[j] = i
-
+        idx_assoc = {j: i for i, j in enumerate(idx)}
         circles = []
         circles_batch = []
         with open(circles_file, 'r') as f:
@@ -121,10 +118,7 @@ def read_ego(files: List[str], name: str) -> List[EgoData]:
 def read_soc(files: List[str], name: str) -> List[Data]:
     import pandas as pd
 
-    skiprows = 4
-    if name == 'pokec':
-        skiprows = 0
-
+    skiprows = 0 if name == 'pokec' else 4
     edge_index = pd.read_csv(files[0], sep='\t', header=None,
                              skiprows=skiprows, dtype=np.int64)
     edge_index = torch.from_numpy(edge_index.values).t()

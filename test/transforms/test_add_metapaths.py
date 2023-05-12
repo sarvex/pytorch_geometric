@@ -52,7 +52,7 @@ def test_add_metapaths():
     assert meta3['metapath_0'].edge_index.size() == (2, 9)
     assert meta4['metapath_0'].edge_index.size() == (2, 9)
 
-    assert all([i in meta1.edge_types for i in data.edge_types])
+    assert all(i in meta1.edge_types for i in data.edge_types)
     assert meta2.edge_types == [('p', 'metapath_0', 'p')]
     assert meta3.edge_types == [('p', 'to', 'p'), ('p', 'metapath_0', 'p')]
     assert meta4.edge_types == [('p', 'to', 'p'), ('p', 'metapath_0', 'p')]
@@ -202,7 +202,7 @@ def test_add_random_metapaths():
     assert meta5['metapath_0'].edge_index.size() == (2, 4)
     assert meta6['metapath_0'].edge_index.size() == (2, 7)
 
-    assert all([i in meta1.edge_types for i in data.edge_types])
+    assert all(i in meta1.edge_types for i in data.edge_types)
     assert meta2.edge_types == [('p', 'metapath_0', 'p')]
     assert meta3.edge_types == [('p', 'to', 'p'), ('p', 'metapath_0', 'p')]
     assert meta4.edge_types == [('p', 'to', 'p'), ('p', 'metapath_0', 'p')]

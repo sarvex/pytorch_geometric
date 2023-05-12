@@ -151,9 +151,8 @@ class GNNBenchmarkDataset(InMemoryDataset):
                 'graphs_Kary_Deterministic_Graphs.pkl',
                 'y_Kary_Deterministic_Graphs.pt'
             ]
-        else:
-            name = self.urls[self.name].split('/')[-1][:-4]
-            return [f'{name}.pt']
+        name = self.urls[self.name].split('/')[-1][:-4]
+        return [f'{name}.pt']
 
     @property
     def processed_file_names(self) -> List[str]:

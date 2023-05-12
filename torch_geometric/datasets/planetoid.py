@@ -87,7 +87,7 @@ class Planetoid(InMemoryDataset):
         self.name = name
 
         self.split = split.lower()
-        assert self.split in ['public', 'full', 'geom-gcn', 'random']
+        assert self.split in {'public', 'full', 'geom-gcn', 'random'}
 
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

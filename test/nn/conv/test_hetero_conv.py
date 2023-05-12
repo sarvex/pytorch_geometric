@@ -37,7 +37,7 @@ def test_hetero_conv(aggr):
             GATConv((-1, -1), 64, edge_dim=3, add_self_loops=False),
         }, aggr=aggr)
 
-    assert len(list(conv.parameters())) > 0
+    assert list(conv.parameters())
     assert str(conv) == 'HeteroConv(num_relations=3)'
 
     out = conv(data.x_dict, data.edge_index_dict, data.edge_attr_dict,
@@ -119,7 +119,7 @@ def test_hetero_conv_with_dot_syntax_node_types():
         GATConv((-1, -1), 64, add_self_loops=False),
     })
 
-    assert len(list(conv.parameters())) > 0
+    assert list(conv.parameters())
     assert str(conv) == 'HeteroConv(num_relations=3)'
 
     out = conv(data.x_dict, data.edge_index_dict,

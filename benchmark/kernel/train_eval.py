@@ -85,9 +85,10 @@ def k_fold(dataset, folds):
     skf = StratifiedKFold(folds, shuffle=True, random_state=12345)
 
     test_indices, train_indices = [], []
-    for _, idx in skf.split(torch.zeros(len(dataset)), dataset.data.y):
-        test_indices.append(torch.from_numpy(idx).to(torch.long))
-
+    test_indices.extend(
+        torch.from_numpy(idx).to(torch.long)
+        for _, idx in skf.split(torch.zeros(len(dataset)), dataset.data.y)
+    )
     val_indices = [test_indices[i - 1] for i in range(folds)]
 
     for i in range(folds):
@@ -100,10 +101,7 @@ def k_fold(dataset, folds):
 
 
 def num_graphs(data):
-    if hasattr(data, 'num_graphs'):
-        return data.num_graphs
-    else:
-        return data.x.size(0)
+    return data.num_graphs if hasattr(data, 'num_graphs') else data.x.size(0)
 
 
 def train(model, optimizer, loader):

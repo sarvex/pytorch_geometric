@@ -45,7 +45,7 @@ class CaptumModel(torch.nn.Module):
         if self.mask_type == MaskLevelType.edge:
             assert len(args) >= 2, "Expects at least x and edge_index as args."
         if self.mask_type == MaskLevelType.node:
-            assert len(args) >= 1, "Expects at least edge_index as args."
+            assert args, "Expects at least edge_index as args."
         if self.mask_type == MaskLevelType.node_and_edge:
             assert args[0].shape[0] == 1, "Dimension 0 of input should be 1"
             assert len(args[1:]) >= 1, "Expects at least edge_index as args."
@@ -211,17 +211,19 @@ def to_captum_input(
         edge_types = edge_index.keys()
         inputs = []
         if mask_type == MaskLevelType.node:
-            for key in node_types:
-                inputs.append(x[key].unsqueeze(0))
+            inputs.extend(x[key].unsqueeze(0) for key in node_types)
         elif mask_type == MaskLevelType.edge:
-            for key in edge_types:
-                inputs.append(_to_edge_mask(edge_index[key]).unsqueeze(0))
+            inputs.extend(
+                _to_edge_mask(edge_index[key]).unsqueeze(0)
+                for key in edge_types
+            )
             additional_forward_args.append(x)
         else:
-            for key in node_types:
-                inputs.append(x[key].unsqueeze(0))
-            for key in edge_types:
-                inputs.append(_to_edge_mask(edge_index[key]).unsqueeze(0))
+            inputs.extend(x[key].unsqueeze(0) for key in node_types)
+            inputs.extend(
+                _to_edge_mask(edge_index[key]).unsqueeze(0)
+                for key in edge_types
+            )
         additional_forward_args.append(edge_index)
 
     else:

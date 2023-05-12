@@ -73,11 +73,11 @@ in_channels, out_channels = dataset.num_features, 16
 
 if not args.variational and not args.linear:
     model = GAE(GCNEncoder(in_channels, out_channels))
-elif not args.variational and args.linear:
+elif not args.variational:
     model = GAE(LinearEncoder(in_channels, out_channels))
-elif args.variational and not args.linear:
+elif not args.linear:
     model = VGAE(VariationalGCNEncoder(in_channels, out_channels))
-elif args.variational and args.linear:
+else:
     model = VGAE(VariationalLinearEncoder(in_channels, out_channels))
 
 model = model.to(device)

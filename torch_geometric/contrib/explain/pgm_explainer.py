@@ -158,11 +158,7 @@ class PGMExplainer(ExplainerAlgorithm):
         top = int(self.num_samples / 8)
         top_idx = torch.argsort(samples[:, num_nodes])[-top:]
         for i in range(self.num_samples):
-            if i in top_idx:
-                samples[i, num_nodes] = 1
-            else:
-                samples[i, num_nodes] = 0
-
+            samples[i, num_nodes] = 1 if i in top_idx else 0
         return samples
 
     def _explain_graph(
@@ -215,8 +211,9 @@ class PGMExplainer(ExplainerAlgorithm):
         # the original code uses number_candidates_nodes = int(top_nodes * 4)
         # if we consider 'top nodes' to equate to max number of nodes
         # it seems more correct to limit number_candidates_nodes to this
-        candidate_nodes = np.argpartition(
-            p_values, self.max_subgraph_size)[0:self.max_subgraph_size]
+        candidate_nodes = np.argpartition(p_values, self.max_subgraph_size)[
+            : self.max_subgraph_size
+        ]
 
         # Round 2
         samples = self._batch_perturb_features_on_node(
@@ -240,7 +237,7 @@ class PGMExplainer(ExplainerAlgorithm):
                 dependent_nodes.append(node)
 
         top_p = np.min((self.max_subgraph_size, num_nodes - 1))
-        ind_top_p = np.argpartition(p_values, top_p)[0:top_p]
+        ind_top_p = np.argpartition(p_values, top_p)[:top_p]
         pgm_nodes = list(ind_top_p)
 
         node_mask = torch.zeros(x.size(), dtype=torch.int)
@@ -358,7 +355,7 @@ class PGMExplainer(ExplainerAlgorithm):
             pgm_nodes = dependent_neighbors
         else:
             top_p = np.min((self.max_subgraph_size, len(neighbors) - 1))
-            ind_top_p = np.argpartition(p_values, top_p)[0:top_p]
+            ind_top_p = np.argpartition(p_values, top_p)[:top_p]
             pgm_nodes = [
                 index_subgraph_to_original[node] for node in ind_top_p
             ]

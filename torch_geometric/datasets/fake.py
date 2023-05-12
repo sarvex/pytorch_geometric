@@ -57,7 +57,7 @@ class FakeDataset(InMemoryDataset):
 
         if task == 'auto':
             task = 'graph' if num_graphs > 1 else 'node'
-        assert task in ['node', 'graph']
+        assert task in {'node', 'graph'}
 
         self.avg_num_nodes = max(avg_num_nodes, avg_degree)
         self.avg_degree = max(avg_degree, 1)
@@ -154,7 +154,7 @@ class FakeHeteroDataset(InMemoryDataset):
 
         if task == 'auto':
             task = 'graph' if num_graphs > 1 else 'node'
-        assert task in ['node', 'graph']
+        assert task in {'node', 'graph'}
 
         self.node_types = [f'v{i}' for i in range(max(num_node_types, 1))]
 
@@ -216,8 +216,6 @@ class FakeHeteroDataset(InMemoryDataset):
                 store.edge_attr = torch.rand(store.num_edges, self.edge_dim)
             elif self.edge_dim == 1:
                 store.edge_weight = torch.rand(store.num_edges)
-
-            pass
 
         if self._num_classes > 0 and self.task == 'graph':
             data.y = torch.tensor([random.randint(0, self._num_classes - 1)])

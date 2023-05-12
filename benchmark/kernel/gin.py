@@ -18,7 +18,7 @@ class GIN0(torch.nn.Module):
                 BN(hidden),
             ), train_eps=False)
         self.convs = torch.nn.ModuleList()
-        for i in range(num_layers - 1):
+        for _ in range(num_layers - 1):
             self.convs.append(
                 GINConv(
                     Sequential(
@@ -65,7 +65,7 @@ class GIN0WithJK(torch.nn.Module):
                 BN(hidden),
             ), train_eps=False)
         self.convs = torch.nn.ModuleList()
-        for i in range(num_layers - 1):
+        for _ in range(num_layers - 1):
             self.convs.append(
                 GINConv(
                     Sequential(
@@ -120,7 +120,7 @@ class GIN(torch.nn.Module):
                 BN(hidden),
             ), train_eps=True)
         self.convs = torch.nn.ModuleList()
-        for i in range(num_layers - 1):
+        for _ in range(num_layers - 1):
             self.convs.append(
                 GINConv(
                     Sequential(
@@ -167,7 +167,7 @@ class GINWithJK(torch.nn.Module):
                 BN(hidden),
             ), train_eps=True)
         self.convs = torch.nn.ModuleList()
-        for i in range(num_layers - 1):
+        for _ in range(num_layers - 1):
             self.convs.append(
                 GINConv(
                     Sequential(

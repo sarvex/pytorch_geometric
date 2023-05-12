@@ -95,10 +95,10 @@ def test():
     pred = out.argmax(dim=-1)
     correct = pred.eq(data.y.to(device))
 
-    accs = []
-    for _, mask in data('train_mask', 'val_mask', 'test_mask'):
-        accs.append(correct[mask].sum().item() / mask.sum().item())
-    return accs
+    return [
+        correct[mask].sum().item() / mask.sum().item()
+        for _, mask in data('train_mask', 'val_mask', 'test_mask')
+    ]
 
 
 for epoch in range(1, 51):

@@ -36,11 +36,10 @@ def face_to_tri(face):
     rect = torch.tensor([line[1:] for line in face if line[0] == 4])
     rect = rect.to(torch.int64)
 
-    if rect.numel() > 0:
-        first, second = rect[:, [0, 1, 2]], rect[:, [0, 2, 3]]
-        return torch.cat([triangle, first, second], dim=0).t().contiguous()
-    else:
+    if rect.numel() <= 0:
         return triangle.t().contiguous()
+    first, second = rect[:, [0, 1, 2]], rect[:, [0, 2, 3]]
+    return torch.cat([triangle, first, second], dim=0).t().contiguous()
 
 
 def read_off(path):

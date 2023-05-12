@@ -8,6 +8,7 @@ This example converges slowly to being able to predict the
 median similar to what is observed in the paper.
 """
 
+
 import numpy as np
 import torch
 
@@ -25,9 +26,7 @@ norm = torch.distributions.normal.Normal(0.5, 0.4)
 gamma = torch.distributions.gamma.Gamma(0.2, 0.5)
 uniform = torch.distributions.uniform.Uniform(0, 1)
 total_loss = 0
-n_loss = 0
-
-for i in range(steps):
+for n_loss, i in enumerate(range(steps), start=1):
     optimizer.zero_grad()
     dist = np.random.choice([norm, gamma, uniform])
     x = dist.sample((input_size, 1))
@@ -36,6 +35,5 @@ for i in range(steps):
     loss.backward()
     optimizer.step()
     total_loss += loss
-    n_loss += 1
     if i % eval_each == (eval_each - 1):
         print(f"Average loss at epoc {i} is {total_loss / n_loss}")

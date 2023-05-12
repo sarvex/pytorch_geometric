@@ -77,7 +77,7 @@ class Twitch(InMemoryDataset):
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None):
         self.name = name
-        assert self.name in ['DE', 'EN', 'ES', 'FR', 'PT', 'RU']
+        assert self.name in {'DE', 'EN', 'ES', 'FR', 'PT', 'RU'}
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 

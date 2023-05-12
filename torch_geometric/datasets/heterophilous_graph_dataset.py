@@ -77,13 +77,13 @@ class HeterophilousGraphDataset(InMemoryDataset):
         pre_transform: Optional[Callable] = None,
     ):
         self.name = name.lower().replace('-', '_')
-        assert self.name in [
+        assert self.name in {
             'roman_empire',
             'amazon_ratings',
             'minesweeper',
             'tolokers',
             'questions',
-        ]
+        }
 
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

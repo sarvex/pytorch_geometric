@@ -12,7 +12,7 @@ def params_count(model):
         model (nn.Module): PyTorch model
 
     '''
-    return sum([p.numel() for p in model.parameters()])
+    return sum(p.numel() for p in model.parameters())
 
 
 def get_stats():
@@ -46,14 +46,14 @@ def match_computation(stats_baseline, key=['gnn', 'dim_inner'], mode='sqrt'):
             if stats == stats_baseline:
                 return stats
             if flag != flag_init:
-                if not cfg.model.match_upper:  # stats is SMALLER
-                    if flag < 0:
-                        cfg[key[0]][key[1]] -= flag_init * step
-                    return get_stats()
-                else:
-                    if flag > 0:
-                        cfg[key[0]][key[1]] -= flag_init * step
-                    return get_stats()
+                if (
+                    not cfg.model.match_upper
+                    and flag < 0
+                    or cfg.model.match_upper
+                    and flag > 0
+                ):
+                    cfg[key[0]][key[1]] -= flag_init * step
+                return get_stats()
     return stats
 
 
@@ -91,6 +91,7 @@ def match_baseline_cfg(cfg_dict, cfg_dict_baseline, verbose=True):
         cfg_dict['gnn'] = {'dim_inner', cfg.gnn.dim_inner}
     set_cfg(cfg)
     if verbose:
-        print('Computational budget has matched: Baseline params {}, '
-              'Current params {}'.format(stats_baseline, stats))
+        print(
+            f'Computational budget has matched: Baseline params {stats_baseline}, Current params {stats}'
+        )
     return cfg_dict

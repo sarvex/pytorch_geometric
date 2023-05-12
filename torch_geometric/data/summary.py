@@ -84,9 +84,10 @@ class Summary:
 
         content = [['', '#nodes', '#edges']]
         stats = [self.num_nodes, self.num_edges]
-        for field in Stats.__dataclass_fields__:
-            row = [field] + [f'{getattr(s, field):.1f}' for s in stats]
-            content.append(row)
+        content.extend(
+            [field] + [f'{getattr(s, field):.1f}' for s in stats]
+            for field in Stats.__dataclass_fields__
+        )
         body = tabulate(content, headers='firstrow', tablefmt='psql')
 
         return prefix + body

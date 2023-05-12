@@ -80,18 +80,17 @@ class DynamicBatchSampler(torch.utils.data.sampler.Sampler):
                 n = data.num_nodes if self.mode == 'node' else data.num_edges
 
                 if batch_n + n > self.max_num:
-                    if batch_n == 0:
-                        if self.skip_too_big:
-                            continue
-                        else:
-                            warnings.warn("Size of data sample at index "
-                                          f"{idx} is larger than "
-                                          f"{self.max_num} {self.mode}s "
-                                          f"(got {n} {self.mode}s.")
-                    else:
+                    if batch_n != 0:
                         # Mini-batch filled
                         break
 
+                    if self.skip_too_big:
+                        continue
+                    else:
+                        warnings.warn("Size of data sample at index "
+                                      f"{idx} is larger than "
+                                      f"{self.max_num} {self.mode}s "
+                                      f"(got {n} {self.mode}s.")
                 # Add sample to current batch
                 batch.append(idx.item())
                 num_processed += 1

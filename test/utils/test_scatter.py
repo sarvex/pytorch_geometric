@@ -90,7 +90,7 @@ if __name__ == '__main__':
     index = torch.randint(num_nodes, (num_edges, ), device=args.device)
 
     def pytorch_scatter(x, index, dim_size, reduce):
-        if reduce == 'min' or reduce == 'max':
+        if reduce in ['min', 'max']:
             reduce = f'a{aggr}'  # `amin` or `amax`
         elif reduce == 'mul':
             reduce = 'prod'

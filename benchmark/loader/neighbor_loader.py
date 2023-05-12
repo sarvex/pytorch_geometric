@@ -53,10 +53,10 @@ def run(args: argparse.ArgumentParser):
                     ) if args.cpu_affinity else nullcontext()
                     runtimes = []
                     num_iterations = 0
-                    with profile, cpu_affinity:
-                        for runit in range(args.runs):
+                    with (profile, cpu_affinity):
+                        for _ in range(args.runs):
                             start = default_timer()
-                            for batch in tqdm.tqdm(train_loader):
+                            for _ in tqdm.tqdm(train_loader):
                                 num_iterations += 1
                             stop = default_timer()
                             runtimes.append(round(stop - start, 3))
@@ -84,10 +84,10 @@ def run(args: argparse.ArgumentParser):
                     args.loader_cores) if args.cpu_affinity else nullcontext()
                 runtimes = []
                 num_iterations = 0
-                with profile, cpu_affinity:
-                    for runit in range(args.runs):
+                with (profile, cpu_affinity):
+                    for _ in range(args.runs):
                         start = default_timer()
-                        for batch in tqdm.tqdm(subgraph_loader):
+                        for _ in tqdm.tqdm(subgraph_loader):
                             num_iterations += 1
                         stop = default_timer()
                         runtimes.append(round(stop - start, 3))

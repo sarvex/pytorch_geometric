@@ -125,11 +125,7 @@ class Net(torch.nn.Module):
         x = self.mlp_classif(fp1_out[0])
         logits = self.fc_classif(x)
 
-        if self.return_logits:
-            return logits
-
-        probas = logits.log_softmax(dim=-1)
-        return probas
+        return logits if self.return_logits else logits.log_softmax(dim=-1)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

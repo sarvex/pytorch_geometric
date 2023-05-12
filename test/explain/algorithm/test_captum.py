@@ -70,10 +70,10 @@ def test_captum_attribution_methods(mask_type, method):
     data = Data(x, edge_index)
     input, additional_forward_args = to_captum_input(data.x, data.edge_index,
                                                      mask_type)
-    if mask_type == 'node':
-        sliding_window_shapes = (3, 3)
-    elif mask_type == 'edge':
+    if mask_type == 'edge':
         sliding_window_shapes = (5, )
+    elif mask_type == 'node':
+        sliding_window_shapes = (3, 3)
     elif mask_type == 'node_and_edge':
         sliding_window_shapes = ((3, 3), (5, ))
 
@@ -86,7 +86,7 @@ def test_captum_attribution_methods(mask_type, method):
         attributions, delta = explainer.attribute(
             input, target=0, return_convergence_delta=True, baselines=input,
             n_samples=1, additional_forward_args=additional_forward_args)
-    elif method == 'DeepLiftShap' or method == 'DeepLift':
+    elif method in ['DeepLiftShap', 'DeepLift']:
         attributions, delta = explainer.attribute(
             input, target=0, return_convergence_delta=True, baselines=input,
             additional_forward_args=additional_forward_args)
@@ -97,10 +97,10 @@ def test_captum_attribution_methods(mask_type, method):
     else:
         attributions = explainer.attribute(
             input, target=0, additional_forward_args=additional_forward_args)
-    if mask_type == 'node':
-        assert attributions[0].shape == (1, 8, 3)
-    elif mask_type == 'edge':
+    if mask_type == 'edge':
         assert attributions[0].shape == (1, 14)
+    elif mask_type == 'node':
+        assert attributions[0].shape == (1, 8, 3)
     else:
         assert attributions[0].shape == (1, 8, 3)
         assert attributions[1].shape == (1, 14)

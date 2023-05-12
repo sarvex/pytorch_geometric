@@ -50,7 +50,7 @@ class RelLinkPredDataset(InMemoryDataset):
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None):
         self.name = name
-        assert name in ['FB15k-237']
+        assert name in {'FB15k-237'}
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 

@@ -73,7 +73,7 @@ def compile(model: Optional[Callable] = None, *args, **kwargs) -> Callable:
         'WITH_TORCH_SCATTER': torch_geometric.typing.WITH_TORCH_SCATTER,
     }
     warnings.filterwarnings('ignore', ".*the 'torch-scatter' package.*")
-    for key in prev_state.keys():
+    for key in prev_state:
         setattr(torch_geometric.typing, key, False)
 
     # Adjust the logging level of `torch.compile`:
@@ -83,7 +83,7 @@ def compile(model: Optional[Callable] = None, *args, **kwargs) -> Callable:
         'torch._inductor': logging.getLogger('torch._inductor').level,
     }
     log_level = kwargs.pop('log_level', logging.WARNING)
-    for key in prev_log_level.keys():
+    for key in prev_log_level:
         logging.getLogger(key).setLevel(log_level)
 
     # Replace instances of `MessagePassing` by their jittable version:

@@ -382,15 +382,12 @@ class MD17(InMemoryDataset):
         if self.revised:
             return osp.join('rmd17', 'npz_data', name)
         elif self.ccsd:
-            return name[:-4] + '-train.npz', name[:-4] + '-test.npz'
+            return f'{name[:-4]}-train.npz', f'{name[:-4]}-test.npz'
         return name
 
     @property
     def processed_file_names(self) -> List[str]:
-        if self.ccsd:
-            return ['train.pt', 'test.pt']
-        else:
-            return ['data.pt']
+        return ['train.pt', 'test.pt'] if self.ccsd else ['data.pt']
 
     def download(self):
         if self.revised:

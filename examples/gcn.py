@@ -77,10 +77,10 @@ def test():
     model.eval()
     pred = model(data.x, data.edge_index, data.edge_attr).argmax(dim=-1)
 
-    accs = []
-    for mask in [data.train_mask, data.val_mask, data.test_mask]:
-        accs.append(int((pred[mask] == data.y[mask]).sum()) / int(mask.sum()))
-    return accs
+    return [
+        int((pred[mask] == data.y[mask]).sum()) / int(mask.sum())
+        for mask in [data.train_mask, data.val_mask, data.test_mask]
+    ]
 
 
 best_val_acc = final_test_acc = 0

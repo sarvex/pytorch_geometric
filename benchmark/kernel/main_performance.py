@@ -92,10 +92,10 @@ def run_train():
                 val_time = t.duration
                 with timeit(log=False) as t:
                     test_acc = eval_acc(model, test_loader)
-                test_time = t.duration
-
                 if epoch >= args.warmup_profile:
                     loss_list.append(loss)
+                    test_time = t.duration
+
                     acc_list.append([val_acc, val_time, test_acc, test_time])
 
             if args.profile:

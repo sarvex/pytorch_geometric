@@ -27,9 +27,9 @@ class GNNNodeHead(nn.Module):
                              has_act=False, has_bias=True, cfg=cfg))
 
     def _apply_index(self, batch):
-        mask = '{}_mask'.format(batch.split)
+        mask = f'{batch.split}_mask'
         return batch.x[batch[mask]], \
-            batch.y[batch[mask]]
+                batch.y[batch[mask]]
 
     def forward(self, batch):
         batch = self.layer_post_mp(batch)
@@ -56,12 +56,12 @@ class GNNEdgeHead(nn.Module):
                                  has_act=False, has_bias=True, cfg=cfg))
             # requires parameter
             self.decode_module = lambda v1, v2: \
-                self.layer_post_mp(torch.cat((v1, v2), dim=-1))
+                    self.layer_post_mp(torch.cat((v1, v2), dim=-1))
         else:
             if dim_out > 1:
                 raise ValueError(
-                    'Binary edge decoding ({})is used for multi-class '
-                    'edge/link prediction.'.format(cfg.model.edge_decoding))
+                    f'Binary edge decoding ({cfg.model.edge_decoding})is used for multi-class edge/link prediction.'
+                )
             self.layer_post_mp = MLP(
                 new_layer_config(dim_in, dim_in, cfg.gnn.layers_post_mp,
                                  has_act=False, has_bias=True, cfg=cfg))
@@ -70,14 +70,13 @@ class GNNEdgeHead(nn.Module):
             elif cfg.model.edge_decoding == 'cosine_similarity':
                 self.decode_module = nn.CosineSimilarity(dim=-1)
             else:
-                raise ValueError('Unknown edge decoding {}.'.format(
-                    cfg.model.edge_decoding))
+                raise ValueError(f'Unknown edge decoding {cfg.model.edge_decoding}.')
 
     def _apply_index(self, batch):
-        index = '{}_edge_index'.format(batch.split)
-        label = '{}_edge_label'.format(batch.split)
+        index = f'{batch.split}_edge_index'
+        label = f'{batch.split}_edge_label'
         return batch.x[batch[index]], \
-            batch[label]
+                batch[label]
 
     def forward(self, batch):
         if cfg.model.edge_decoding != 'concat':

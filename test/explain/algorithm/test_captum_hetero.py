@@ -49,10 +49,10 @@ def test_captum_attribution_methods_hetero(mask_type, method, hetero_data,
         'additional_arg',
     )
 
-    if mask_type == 'node':
-        sliding_window_shapes = ((3, 3), (3, 3))
-    elif mask_type == 'edge':
+    if mask_type == 'edge':
         sliding_window_shapes = ((5, ), (5, ), (5, ))
+    elif mask_type == 'node':
+        sliding_window_shapes = ((3, 3), (3, 3))
     else:
         sliding_window_shapes = ((3, 3), (3, 3), (5, ), (5, ), (5, ))
 
@@ -65,7 +65,7 @@ def test_captum_attribution_methods_hetero(mask_type, method, hetero_data,
         attributions, delta = explainer.attribute(
             inputs, target=0, return_convergence_delta=True, baselines=inputs,
             n_samples=1, additional_forward_args=additional_forward_args)
-    elif method == 'DeepLiftShap' or method == 'DeepLift':
+    elif method in ['DeepLiftShap', 'DeepLift']:
         attributions, delta = explainer.attribute(
             inputs, target=0, return_convergence_delta=True, baselines=inputs,
             additional_forward_args=additional_forward_args)

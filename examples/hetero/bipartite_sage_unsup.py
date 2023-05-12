@@ -165,13 +165,13 @@ class Model(torch.nn.Module):
         self.decoder = EdgeDecoder(out_channels)
 
     def forward(self, x_dict, edge_index_dict, edge_label_index):
-        z_dict = {}
         x_dict['user'] = self.user_emb(x_dict['user'])
         x_dict['item'] = self.item_emb(x_dict['item'])
-        z_dict['item'] = self.item_encoder(
-            x_dict['item'],
-            edge_index_dict[('item', 'to', 'item')],
-        )
+        z_dict = {
+            'item': self.item_encoder(
+                x_dict['item'], edge_index_dict[('item', 'to', 'item')]
+            )
+        }
         z_dict['user'] = self.user_encoder(x_dict, edge_index_dict)
 
         return self.decoder(z_dict['user'], z_dict['item'], edge_label_index)

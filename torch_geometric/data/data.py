@@ -169,7 +169,7 @@ class BaseData(object):
             You will be given a warning that requests you to do so.
         """
         try:
-            return sum([v.num_nodes for v in self.node_stores])
+            return sum(v.num_nodes for v in self.node_stores)
         except TypeError:
             return None
 
@@ -185,7 +185,7 @@ class BaseData(object):
         r"""Returns the number of edges in the graph.
         For undirected graphs, this will return the number of bi-directional
         edges, which is double the amount of unique edges."""
-        return sum([v.num_edges for v in self.edge_stores])
+        return sum(v.num_edges for v in self.edge_stores)
 
     def node_attrs(self) -> List[str]:
         r"""Returns all node-level tensor attribute names."""
@@ -198,7 +198,7 @@ class BaseData(object):
     def is_coalesced(self) -> bool:
         r"""Returns :obj:`True` if edge indices :obj:`edge_index` are sorted
         and do not contain duplicate entries."""
-        return all([store.is_coalesced() for store in self.edge_stores])
+        return all(store.is_coalesced() for store in self.edge_stores)
 
     def generate_ids(self):
         r"""Generates and sets :obj:`n_id` and :obj:`e_id` attributes to assign
@@ -217,15 +217,15 @@ class BaseData(object):
 
     def has_isolated_nodes(self) -> bool:
         r"""Returns :obj:`True` if the graph contains isolated nodes."""
-        return any([store.has_isolated_nodes() for store in self.edge_stores])
+        return any(store.has_isolated_nodes() for store in self.edge_stores)
 
     def has_self_loops(self) -> bool:
         """Returns :obj:`True` if the graph contains self-loops."""
-        return any([store.has_self_loops() for store in self.edge_stores])
+        return any(store.has_self_loops() for store in self.edge_stores)
 
     def is_undirected(self) -> bool:
         r"""Returns :obj:`True` if graph edges are undirected."""
-        return all([store.is_undirected() for store in self.edge_stores])
+        return all(store.is_undirected() for store in self.edge_stores)
 
     def is_directed(self) -> bool:
         r"""Returns :obj:`True` if graph edges are directed."""
@@ -480,7 +480,7 @@ class Data(BaseData, FeatureStore, GraphStore):
 
     def __repr__(self) -> str:
         cls = self.__class__.__name__
-        has_dict = any([isinstance(v, Mapping) for v in self._store.values()])
+        has_dict = any(isinstance(v, Mapping) for v in self._store.values())
 
         if not has_dict:
             info = [size_repr(k, v) for k, v in self._store.items()]
@@ -544,13 +544,14 @@ class Data(BaseData, FeatureStore, GraphStore):
             warn_or_raise(f"'num_nodes' is undefined in '{cls_name}'",
                           raise_on_error)
 
-        if 'edge_index' in self:
-            if self.edge_index.dim() != 2 or self.edge_index.size(0) != 2:
-                status = False
-                warn_or_raise(
-                    f"'edge_index' needs to be of shape [2, num_edges] in "
-                    f"'{cls_name}' (found {self.edge_index.size()})",
-                    raise_on_error)
+        if 'edge_index' in self and (
+            self.edge_index.dim() != 2 or self.edge_index.size(0) != 2
+        ):
+            status = False
+            warn_or_raise(
+                f"'edge_index' needs to be of shape [2, num_edges] in "
+                f"'{cls_name}' (found {self.edge_index.size()})",
+                raise_on_error)
 
         if 'edge_index' in self and self.edge_index.numel() > 0:
             if self.edge_index.min() < 0:
@@ -708,11 +709,10 @@ class Data(BaseData, FeatureStore, GraphStore):
             index_map[node_ids[i]] = torch.arange(len(node_ids[i]),
                                                   device=index_map.device)
 
-        # We iterate over edge types to find the local edge indices:
-        edge_ids = {}
-        for i, key in enumerate(edge_type_names):
-            edge_ids[i] = (edge_type == i).nonzero(as_tuple=False).view(-1)
-
+        edge_ids = {
+            i: (edge_type == i).nonzero(as_tuple=False).view(-1)
+            for i, key in enumerate(edge_type_names)
+        }
         data = HeteroData()
 
         for i, key in enumerate(node_type_names):
@@ -788,15 +788,13 @@ class Data(BaseData, FeatureStore, GraphStore):
     def __iter__(self) -> Iterable:
         r"""Iterates over all attributes in the data, yielding their attribute
         names and values."""
-        for key, value in self._store.items():
-            yield key, value
+        yield from self._store.items()
 
     def __call__(self, *args: List[str]) -> Iterable:
         r"""Iterates over all attributes :obj:`*args` in the data, yielding
         their attribute names and values.
         If :obj:`*args` is not given, will iterate over all attributes."""
-        for key, value in self._store.items(*args):
-            yield key, value
+        yield from self._store.items(*args)
 
     @property
     def x(self) -> Any:
@@ -961,7 +959,7 @@ def size_repr(key: Any, value: Any, indent: int = 0) -> str:
     elif isinstance(value, np.ndarray):
         out = str(list(value.shape))
     elif isinstance(value, SparseTensor):
-        out = str(value.sizes())[:-1] + f', nnz={value.nnz()}]'
+        out = f'{str(value.sizes())[:-1]}, nnz={value.nnz()}]'
     elif isinstance(value, str):
         out = f"'{value}'"
     elif isinstance(value, Sequence):

@@ -47,7 +47,7 @@ class WikipediaNetwork(InMemoryDataset):
                  pre_transform: Optional[Callable] = None):
         self.name = name.lower()
         self.geom_gcn_preprocess = geom_gcn_preprocess
-        assert self.name in ['chameleon', 'crocodile', 'squirrel']
+        assert self.name in {'chameleon', 'crocodile', 'squirrel'}
         if geom_gcn_preprocess and self.name == 'crocodile':
             raise AttributeError("The dataset 'crocodile' is not available in "
                                  "case 'geom_gcn_preprocess=True'")

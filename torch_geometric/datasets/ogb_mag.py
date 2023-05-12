@@ -87,13 +87,10 @@ class OGB_MAG(InMemoryDataset):
 
     @property
     def processed_file_names(self) -> str:
-        if self.preprocess is not None:
-            return f'data_{self.preprocess}.pt'
-        else:
-            return 'data.pt'
+        return 'data.pt' if self.preprocess is None else f'data_{self.preprocess}.pt'
 
     def download(self):
-        if not all([osp.exists(f) for f in self.raw_paths[:5]]):
+        if not all(osp.exists(f) for f in self.raw_paths[:5]):
             path = download_url(self.url, self.raw_dir)
             extract_zip(path, self.raw_dir)
             for file_name in ['node-feat', 'node-label', 'relations']:

@@ -112,20 +112,14 @@ class Net(torch.nn.Module):
         if x is None:
             x = torch.ones((pos.shape[0], 1)).to(pos.get_device())
 
-        out_x = []
-        out_pos = []
-        out_batch = []
-
         # first block
         x = self.mlp_input(x)
         edge_index = knn_graph(pos, k=self.k, batch=batch)
         x = self.transformer_input(x, pos, edge_index)
 
-        # save outputs for skipping connections
-        out_x.append(x)
-        out_pos.append(pos)
-        out_batch.append(batch)
-
+        out_x = [x]
+        out_pos = [pos]
+        out_batch = [batch]
         # backbone down : #reduce cardinality and augment dimensionnality
         for i in range(len(self.transformers_down)):
             x, pos, batch = self.transition_down[i](x, pos, batch=batch)

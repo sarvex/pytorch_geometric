@@ -226,7 +226,7 @@ class GNNExplainer_:
         allow_edge_mask: bool = True,
         **kwargs,
     ):
-        assert feat_mask_type in ['feature', 'individual_feature', 'scalar']
+        assert feat_mask_type in {'feature', 'individual_feature', 'scalar'}
 
         explainer_config = ExplainerConfig(
             explanation_type='model',

@@ -42,8 +42,7 @@ def save_ckpt(
     epoch: int = 0,
 ):
     r"""Saves the model checkpoint at a given epoch."""
-    ckpt: Dict[str, Any] = {}
-    ckpt[MODEL_STATE] = model.state_dict()
+    ckpt: Dict[str, Any] = {MODEL_STATE: model.state_dict()}
     if optimizer is not None:
         ckpt[OPTIMIZER_STATE] = optimizer.state_dict()
     if scheduler is not None:

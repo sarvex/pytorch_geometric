@@ -11,11 +11,11 @@ def test_citeseer(get_dataset):
     for batch in loader:
         assert batch.num_graphs == len(batch) == 1
         assert batch.num_nodes == 3327
-        assert batch.num_edges / 2 == 4552
+        assert batch.num_edges == 9104
 
         assert list(batch.x.size()) == [batch.num_nodes, 3703]
         assert list(batch.y.size()) == [batch.num_nodes]
-        assert batch.y.max() + 1 == 6
+        assert batch.y.max() == 5
         assert batch.train_mask.sum() == 6 * 20
         assert batch.val_mask.sum() == 500
         assert batch.test_mask.sum() == 1000

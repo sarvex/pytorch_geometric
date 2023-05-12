@@ -58,7 +58,7 @@ def load_pyg(name, dataset_dir):
     Returns: PyG dataset object
 
     """
-    dataset_dir = '{}/{}'.format(dataset_dir, name)
+    dataset_dir = f'{dataset_dir}/{name}'
     if name in ['Cora', 'CiteSeer', 'PubMed']:
         dataset = Planetoid(dataset_dir, name)
     elif name[:3] == 'TU_':
@@ -87,7 +87,7 @@ def load_pyg(name, dataset_dir):
     elif name == 'QM7b':
         dataset = QM7b(dataset_dir)
     else:
-        raise ValueError('{} not support'.format(name))
+        raise ValueError(f'{name} not support')
 
     return dataset
 
@@ -190,11 +190,10 @@ def load_dataset():
     # Load from Pytorch Geometric dataset
     if format == 'PyG':
         dataset = load_pyg(name, dataset_dir)
-    # Load from OGB formatted data
     elif format == 'OGB':
         dataset = load_ogb(name.replace('_', '-'), dataset_dir)
     else:
-        raise ValueError('Unknown data format: {}'.format(format))
+        raise ValueError(f'Unknown data format: {format}')
     return dataset
 
 
@@ -302,7 +301,7 @@ def get_loader(dataset, sampler, batch_size, shuffle=True):
                           persistent_workers=pw)
 
     else:
-        raise NotImplementedError("%s sampler is not implemented!" % sampler)
+        raise NotImplementedError(f"{sampler} sampler is not implemented!")
     return loader_train
 
 

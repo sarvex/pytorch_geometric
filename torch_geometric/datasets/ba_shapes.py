@@ -42,7 +42,7 @@ class BAShapes(InMemoryDataset):
     def __init__(self, connection_distribution: str = "random",
                  transform: Optional[Callable] = None):
         super().__init__('.', transform)
-        assert connection_distribution in ['random', 'uniform']
+        assert connection_distribution in {'random', 'uniform'}
 
         # Build the Barabasi-Albert graph:
         num_nodes = 300

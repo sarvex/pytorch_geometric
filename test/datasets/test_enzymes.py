@@ -33,7 +33,7 @@ def test_enzymes(get_dataset):
 
         assert list(batch.x.size()) == [batch.num_nodes, 3]
         assert list(batch.y.size()) == [batch.num_graphs]
-        assert batch.y.max() + 1 == 6
+        assert batch.y.max() == 5
         assert list(batch.batch.size()) == [batch.num_nodes]
         assert batch.ptr.numel() == batch.num_graphs + 1
 

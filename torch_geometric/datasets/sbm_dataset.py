@@ -64,9 +64,7 @@ class StochasticBlockModelDataset(InMemoryDataset):
             'n_redundant': 0,
             'flip_y': 0.0,
             'shuffle': False,
-        }
-        self.kwargs.update(kwargs)
-
+        } | kwargs
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])
 

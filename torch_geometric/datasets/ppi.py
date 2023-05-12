@@ -70,16 +70,16 @@ class PPI(InMemoryDataset):
         pre_filter: Optional[Callable] = None,
     ):
 
-        assert split in ['train', 'val', 'test']
+        assert split in {'train', 'val', 'test'}
 
         super().__init__(root, transform, pre_transform, pre_filter)
 
-        if split == 'train':
+        if split == 'test':
+            self.data, self.slices = torch.load(self.processed_paths[2])
+        elif split == 'train':
             self.data, self.slices = torch.load(self.processed_paths[0])
         elif split == 'val':
             self.data, self.slices = torch.load(self.processed_paths[1])
-        elif split == 'test':
-            self.data, self.slices = torch.load(self.processed_paths[2])
 
     @property
     def raw_file_names(self) -> List[str]:

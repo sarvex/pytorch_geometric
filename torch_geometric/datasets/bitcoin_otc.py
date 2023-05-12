@@ -79,7 +79,7 @@ class BitcoinOTC(InMemoryDataset):
     def process(self):
         with open(self.raw_paths[0], 'r') as f:
             data = f.read().split('\n')[:-1]
-            data = [[x for x in line.split(',')] for line in data]
+            data = [list(line.split(',')) for line in data]
 
             edge_index = [[int(line[0]), int(line[1])] for line in data]
             edge_index = torch.tensor(edge_index, dtype=torch.long)

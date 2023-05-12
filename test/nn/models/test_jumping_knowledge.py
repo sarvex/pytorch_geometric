@@ -6,7 +6,7 @@ from torch_geometric.testing import is_full_test
 
 def test_jumping_knowledge():
     num_nodes, channels, num_layers = 100, 17, 5
-    xs = list([torch.randn(num_nodes, channels) for _ in range(num_layers)])
+    xs = [torch.randn(num_nodes, channels) for _ in range(num_layers)]
 
     model = JumpingKnowledge('cat')
     assert str(model) == 'JumpingKnowledge(cat)'

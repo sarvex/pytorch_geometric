@@ -128,20 +128,20 @@ class GeneralMultiLayer(nn.Module):
     def __init__(self, name, layer_config: LayerConfig, **kwargs):
         super().__init__()
         dim_inner = layer_config.dim_out \
-            if layer_config.dim_inner is None \
-            else layer_config.dim_inner
+                if layer_config.dim_inner is None \
+                else layer_config.dim_inner
         for i in range(layer_config.num_layers):
             d_in = layer_config.dim_in if i == 0 else dim_inner
             d_out = layer_config.dim_out \
-                if i == layer_config.num_layers - 1 else dim_inner
+                    if i == layer_config.num_layers - 1 else dim_inner
             has_act = layer_config.final_act \
-                if i == layer_config.num_layers - 1 else True
+                    if i == layer_config.num_layers - 1 else True
             inter_layer_config = copy.deepcopy(layer_config)
             inter_layer_config.dim_in = d_in
             inter_layer_config.dim_out = d_out
             inter_layer_config.has_act = has_act
             layer = GeneralLayer(name, inter_layer_config, **kwargs)
-            self.add_module('Layer_{}'.format(i), layer)
+            self.add_module(f'Layer_{i}', layer)
 
     def forward(self, batch):
         for layer in self.children():
@@ -227,8 +227,8 @@ class MLP(nn.Module):
     def __init__(self, layer_config: LayerConfig, **kwargs):
         super().__init__()
         dim_inner = layer_config.dim_in \
-            if layer_config.dim_inner is None \
-            else layer_config.dim_inner
+                if layer_config.dim_inner is None \
+                else layer_config.dim_inner
         layer_config.has_bias = True
         layers = []
         if layer_config.num_layers > 1:
@@ -238,9 +238,7 @@ class MLP(nn.Module):
                 dim_inner=dim_inner, final_act=True)
             layers.append(GeneralMultiLayer('linear', sub_layer_config))
             layer_config = replace(layer_config, dim_in=dim_inner)
-            layers.append(Linear(layer_config))
-        else:
-            layers.append(Linear(layer_config))
+        layers.append(Linear(layer_config))
         self.model = nn.Sequential(*layers)
 
     def forward(self, batch):

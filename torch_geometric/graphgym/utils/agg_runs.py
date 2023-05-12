@@ -28,10 +28,7 @@ def is_seed(s):
 
 
 def is_split(s):
-    if s in ['train', 'val']:
-        return True
-    else:
-        return False
+    return s in ['train', 'val']
 
 
 def join_list(l1, l2):
@@ -54,7 +51,7 @@ def agg_dict_list(dict_list):
         if key != 'epoch':
             value = np.array([dict[key] for dict in dict_list])
             dict_agg[key] = np.mean(value).round(cfg.round)
-            dict_agg['{}_std'.format(key)] = np.std(value).round(cfg.round)
+            dict_agg[f'{key}_std'] = np.std(value).round(cfg.round)
     return dict_agg
 
 
@@ -106,10 +103,7 @@ def agg_runs(dir, metric_best='auto'):
                     metric = metric_best
                 performance_np = np.array(  # noqa
                     [stats[metric] for stats in stats_list])
-                best_epoch = \
-                    stats_list[
-                        eval("performance_np.{}()".format(cfg.metric_agg))][
-                        'epoch']
+                best_epoch = stats_list[eval(f"performance_np.{cfg.metric_agg}()")]['epoch']
                 print(best_epoch)
 
             for split in os.listdir(dir_seed):
@@ -158,8 +152,9 @@ def agg_runs(dir, metric_best='auto'):
         dir_out = os.path.join(dir, 'agg', key)
         fname = os.path.join(dir_out, 'best.json')
         dict_to_json(value, fname)
-    logging.info('Results aggregated across runs saved in {}'.format(
-        os.path.join(dir, 'agg')))
+    logging.info(
+        f"Results aggregated across runs saved in {os.path.join(dir, 'agg')}"
+    )
 
 
 def agg_batch(dir, metric_best='auto'):
@@ -189,12 +184,12 @@ def agg_batch(dir, metric_best='auto'):
                     results[split].append({**dict_name, **dict_stats})
     dir_out = os.path.join(dir, 'agg')
     makedirs_rm_exist(dir_out)
-    for key in results:
-        if len(results[key]) > 0:
+    for key, value in results.items():
+        if len(value) > 0:
             results[key] = pd.DataFrame(results[key])
             results[key] = results[key].sort_values(
                 list(dict_name.keys()), ascending=[True] * len(dict_name))
-            fname = os.path.join(dir_out, '{}_best.csv'.format(key))
+            fname = os.path.join(dir_out, f'{key}_best.csv')
             results[key].to_csv(fname, index=False)
 
     results = {'train': [], 'val': [], 'test': []}
@@ -212,12 +207,12 @@ def agg_batch(dir, metric_best='auto'):
                             ['lr', 'lr_std', 'eta', 'eta_std', 'params_std'])
                     results[split].append({**dict_name, **dict_stats})
     dir_out = os.path.join(dir, 'agg')
-    for key in results:
-        if len(results[key]) > 0:
+    for key, value_ in results.items():
+        if len(value_) > 0:
             results[key] = pd.DataFrame(results[key])
             results[key] = results[key].sort_values(
                 list(dict_name.keys()), ascending=[True] * len(dict_name))
-            fname = os.path.join(dir_out, '{}.csv'.format(key))
+            fname = os.path.join(dir_out, f'{key}.csv')
             results[key].to_csv(fname, index=False)
 
     results = {'train': [], 'val': [], 'test': []}
@@ -238,18 +233,17 @@ def agg_batch(dir, metric_best='auto'):
                         metric = metric_best
                     performance_np = np.array(  # noqa
                         [stats[metric] for stats in dict_stats])
-                    dict_stats = dict_stats[eval("performance_np.{}()".format(
-                        cfg.metric_agg))]
+                    dict_stats = dict_stats[eval(f"performance_np.{cfg.metric_agg}()")]
                     rm_keys(dict_stats,
                             ['lr', 'lr_std', 'eta', 'eta_std', 'params_std'])
                     results[split].append({**dict_name, **dict_stats})
     dir_out = os.path.join(dir, 'agg')
-    for key in results:
-        if len(results[key]) > 0:
+    for key, value__ in results.items():
+        if len(value__) > 0:
             results[key] = pd.DataFrame(results[key])
             results[key] = results[key].sort_values(
                 list(dict_name.keys()), ascending=[True] * len(dict_name))
-            fname = os.path.join(dir_out, '{}_bestepoch.csv'.format(key))
+            fname = os.path.join(dir_out, f'{key}_bestepoch.csv')
             results[key].to_csv(fname, index=False)
 
-    print('Results aggregated across models saved in {}'.format(dir_out))
+    print(f'Results aggregated across models saved in {dir_out}')

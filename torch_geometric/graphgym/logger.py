@@ -22,7 +22,7 @@ def set_printing():
     logging.root.handlers = []
     logging_cfg = {'level': logging.INFO, 'format': '%(message)s'}
     makedirs(cfg.run_dir)
-    h_file = logging.FileHandler('{}/logging.log'.format(cfg.run_dir))
+    h_file = logging.FileHandler(f'{cfg.run_dir}/logging.log')
     h_stdout = logging.StreamHandler(sys.stdout)
     if cfg.print == 'file':
         logging_cfg['handlers'] = [h_file]
@@ -43,7 +43,7 @@ class Logger(object):
         self._epoch_total = cfg.optim.max_epoch
         self._time_total = 0  # won't be reset
 
-        self.out_dir = '{}/{}'.format(cfg.run_dir, name)
+        self.out_dir = f'{cfg.run_dir}/{name}'
         makedirs(self.out_dir)
         if cfg.tensorboard_each_run:
             from tensorboardX import SummaryWriter
@@ -85,10 +85,10 @@ class Logger(object):
     def custom(self):
         if len(self._custom_stats) == 0:
             return {}
-        out = {}
-        for key, val in self._custom_stats.items():
-            out[key] = val / self._size_current
-        return out
+        return {
+            key: val / self._size_current
+            for key, val in self._custom_stats.items()
+        }
 
     def _get_pred_int(self, pred_score):
         if len(pred_score.shape) == 1 or pred_score.shape[1] == 1:
@@ -213,9 +213,9 @@ class Logger(object):
             }
 
         # print
-        logging.info('{}: {}'.format(self.name, stats))
+        logging.info(f'{self.name}: {stats}')
         # json
-        dict_to_json(stats, '{}/stats.json'.format(self.out_dir))
+        dict_to_json(stats, f'{self.out_dir}/stats.json')
         # tensorboard
         if cfg.tensorboard_each_run:
             dict_to_tb(stats, self.tb_writer, cur_epoch)
@@ -227,8 +227,8 @@ class Logger(object):
 
 
 def infer_task():
-    num_label = cfg.share.dim_out
     if cfg.dataset.task_type == 'classification':
+        num_label = cfg.share.dim_out
         if num_label <= 2:
             task_type = 'classification_binary'
         else:
@@ -240,11 +240,11 @@ def infer_task():
 
 def create_logger():
     r"""Create logger for the experiment."""
-    loggers = []
     names = ['train', 'val', 'test']
-    for i, dataset in enumerate(range(cfg.share.num_splits)):
-        loggers.append(Logger(name=names[i], task_type=infer_task()))
-    return loggers
+    return [
+        Logger(name=names[i], task_type=infer_task())
+        for i, dataset in enumerate(range(cfg.share.num_splits))
+    ]
 
 
 class LoggerCallback(Callback):

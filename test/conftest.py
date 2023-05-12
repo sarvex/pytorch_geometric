@@ -13,22 +13,22 @@ def load_dataset(root: str, name: str, *args, **kwargs) -> Dataset:
     if 'karate' in name.lower():
         from torch_geometric.datasets import KarateClub
         return KarateClub(*args, **kwargs)
-    if name.lower() in ['cora', 'citeseer', 'pubmed']:
+    if name.lower() in {'cora', 'citeseer', 'pubmed'}:
         from torch_geometric.datasets import Planetoid
         path = osp.join(root, 'Planetoid', name)
         return Planetoid(path, name, *args, **kwargs)
-    if name in ['BZR', 'ENZYMES', 'IMDB-BINARY', 'MUTAG']:
+    if name in {'BZR', 'ENZYMES', 'IMDB-BINARY', 'MUTAG'}:
         from torch_geometric.datasets import TUDataset
         path = osp.join(root, 'TUDataset')
         return TUDataset(path, name, *args, **kwargs)
-    if name in ['ego-facebook', 'soc-Slashdot0811', 'wiki-vote']:
+    if name in {'ego-facebook', 'soc-Slashdot0811', 'wiki-vote'}:
         from torch_geometric.datasets import SNAPDataset
         path = osp.join(root, 'SNAPDataset')
         return SNAPDataset(path, name, *args, **kwargs)
-    if name.lower() in ['bashapes']:
+    if name.lower() in {'bashapes'}:
         from torch_geometric.datasets import BAShapes
         return BAShapes(*args, **kwargs)
-    if name in ['citationCiteseer', 'illc1850']:
+    if name in {'citationCiteseer', 'illc1850'}:
         from torch_geometric.datasets import SuiteSparseMatrixCollection
         path = osp.join(root, 'SuiteSparseMatrixCollection')
         return SuiteSparseMatrixCollection(path, name=name, *args, **kwargs)
@@ -36,7 +36,7 @@ def load_dataset(root: str, name: str, *args, **kwargs) -> Dataset:
         from torch_geometric.datasets import EllipticBitcoinDataset
         path = osp.join(root, 'EllipticBitcoinDataset')
         return EllipticBitcoinDataset(path, *args, **kwargs)
-    if name.lower() in ['hetero']:
+    if name.lower() in {'hetero'}:
         from torch_geometric.testing import FakeHeteroDataset
         return FakeHeteroDataset(*args, **kwargs)
 
@@ -60,7 +60,7 @@ def disable_extensions():
         'WITH_TORCH_SCATTER': torch_geometric.typing.WITH_TORCH_SCATTER,
         'WITH_TORCH_SPARSE': torch_geometric.typing.WITH_TORCH_SPARSE,
     }
-    for key in prev_state.keys():
+    for key in prev_state:
         setattr(torch_geometric.typing, key, False)
     yield
     for key, value in prev_state.items():

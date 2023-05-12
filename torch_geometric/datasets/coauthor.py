@@ -56,7 +56,7 @@ class Coauthor(InMemoryDataset):
     def __init__(self, root: str, name: str,
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None):
-        assert name.lower() in ['cs', 'physics']
+        assert name.lower() in {'cs', 'physics'}
         self.name = 'CS' if name.lower() == 'cs' else 'Physics'
         super().__init__(root, transform, pre_transform)
         self.data, self.slices = torch.load(self.processed_paths[0])

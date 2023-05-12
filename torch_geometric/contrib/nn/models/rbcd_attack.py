@@ -208,8 +208,7 @@ class PRBCDAttack(torch.nn.Module):
         # Sample initial search space (Algorithm 1, line 3-4)
         self._sample_random_block(budget)
 
-        steps = range(self.epochs)
-        return steps
+        return range(self.epochs)
 
     @torch.no_grad()
     def _update(self, epoch: int, gradient: Tensor, x: Tensor, labels: Tensor,
@@ -508,10 +507,7 @@ class PRBCDAttack(torch.nn.Module):
     @staticmethod
     def _num_possible_edges(n: int, is_undirected: bool) -> int:
         """Determine number of possible edges for graph."""
-        if is_undirected:
-            return n * (n - 1) // 2
-        else:
-            return int(n**2)  # We filter self-loops later
+        return n * (n - 1) // 2 if is_undirected else int(n**2)
 
     @staticmethod
     def _linear_to_triu_idx(n: int, lin_idx: Tensor) -> Tensor:
@@ -568,9 +564,7 @@ class PRBCDAttack(torch.nn.Module):
         best_non_target_score = score.amax(dim=-1)
 
         margin_ = best_non_target_score - true_score
-        if reduce is None:
-            return margin_
-        return margin_.mean()
+        return margin_ if reduce is None else margin_.mean()
 
     @staticmethod
     def _tanh_margin_loss(prediction: Tensor, labels: Tensor,
@@ -588,8 +582,7 @@ class PRBCDAttack(torch.nn.Module):
         """
         log_prob = F.log_softmax(prediction, dim=-1)
         margin_ = GRBCDAttack._margin_loss(log_prob, labels, idx_mask)
-        loss = torch.tanh(margin_).mean()
-        return loss
+        return torch.tanh(margin_).mean()
 
     @staticmethod
     def _probability_margin_loss(prediction: Tensor, labels: Tensor,
@@ -750,11 +743,7 @@ class GRBCDAttack(PRBCDAttack):
         # Sample initial search space (Algorithm 2, line 3-4)
         self._sample_random_block(step_size)
 
-        # Return debug information
-        scalars = {
-            'number_positive_entries_in_gradient': (gradient > 0).sum().item()
-        }
-        return scalars
+        return {'number_positive_entries_in_gradient': (gradient > 0).sum().item()}
 
     def _close(self, *args, **kwargs) -> Tuple[Tensor, Tensor]:
         """Clean up and prepare return argument."""

@@ -69,7 +69,7 @@ class TensorAttr(CastMixin):
 
     def is_fully_specified(self) -> bool:
         r"""Whether the :obj:`TensorAttr` has no unset fields."""
-        return all([self.is_set(key) for key in self.__dataclass_fields__])
+        return all(self.is_set(key) for key in self.__dataclass_fields__)
 
     def fully_specify(self) -> 'TensorAttr':
         r"""Sets all :obj:`UNSET` fields to :obj:`None`."""
@@ -134,13 +134,14 @@ class AttrView(CastMixin):
         """
         out = copy.copy(self)
 
-        # Find the first attribute name that is UNSET:
-        attr_name: Optional[str] = None
-        for field in out._attr.__dataclass_fields__:
-            if getattr(out._attr, field) == _field_status.UNSET:
-                attr_name = field
-                break
-
+        attr_name: Optional[str] = next(
+            (
+                field
+                for field in out._attr.__dataclass_fields__
+                if getattr(out._attr, field) == _field_status.UNSET
+            ),
+            None,
+        )
         if attr_name is None:
             raise AttributeError(f"Cannot access attribute '{key}' on view "
                                  f"'{out}' as all attributes have already "
@@ -365,8 +366,7 @@ class FeatureStore:
                 :class:`TensorAttr` was not found.
         """
         attrs = [self._tensor_attr_cls.cast(attr) for attr in attrs]
-        bad_attrs = [attr for attr in attrs if not attr.is_fully_specified()]
-        if len(bad_attrs) > 0:
+        if bad_attrs := [attr for attr in attrs if not attr.is_fully_specified()]:
             raise ValueError(
                 f"The input TensorAttr(s) '{bad_attrs}' are not fully "
                 f"specified. Please fully-specify them by specifying all "
@@ -496,10 +496,7 @@ class FeatureStore:
         """
         # CastMixin will handle the case of key being a tuple or TensorAttr:
         attr = self._tensor_attr_cls.cast(key)
-        if attr.is_fully_specified():
-            return self.get_tensor(attr)
-        # If the view is not fully-specified, return a :class:`AttrView`:
-        return self.view(attr)
+        return self.get_tensor(attr) if attr.is_fully_specified() else self.view(attr)
 
     def __delitem__(self, key: TensorAttr):
         r"""Supports :obj:`del store[tensor_attr]`."""

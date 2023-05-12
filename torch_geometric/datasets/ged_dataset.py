@@ -212,9 +212,9 @@ class GEDDataset(InMemoryDataset):
 
             torch.save(self.collate(data_list), p_path)
 
-        assoc = {idx: i for i, idx in enumerate(ids[0])}
-        assoc.update({idx: i + len(ids[0]) for i, idx in enumerate(ids[1])})
-
+        assoc = {idx: i for i, idx in enumerate(ids[0])} | {
+            idx: i + len(ids[0]) for i, idx in enumerate(ids[1])
+        }
         # Extracting ground-truth GEDs from the GED pickle file
         path = osp.join(self.raw_dir, self.name, 'ged.pickle')
         # Initialize GEDs as float('inf'):

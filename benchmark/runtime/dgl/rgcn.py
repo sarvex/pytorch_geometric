@@ -57,11 +57,7 @@ class RGCNConv(torch.nn.Module):
         self.g.update_all(msg_func, self.rgcn_reduce)
         out = self.g.ndata.pop('x')
 
-        if x is None:
-            out = out + self.root
-        else:
-            out = out + torch.matmul(x, self.root)
-
+        out = out + self.root if x is None else out + torch.matmul(x, self.root)
         out = out + self.bias
         return out
 
@@ -126,11 +122,7 @@ class RGCNSPMVConv(torch.nn.Module):
         self.g.update_all(msg_func, fn.sum(msg='m', out='x'))
         out = self.g.ndata.pop('x')
 
-        if x is None:
-            out = out + self.root
-        else:
-            out = out + torch.matmul(x, self.root)
-
+        out = out + self.root if x is None else out + torch.matmul(x, self.root)
         out = out + self.bias
         return out
 
