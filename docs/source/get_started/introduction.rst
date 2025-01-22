@@ -3,7 +3,7 @@ Introduction by Example
 
 We shortly introduce the fundamental concepts of :pyg:`PyG` through self-contained examples.
 
-For an introduction to Graph Machine Learning, we refer the interested reader to the :stanford:`null` `Stanford CS22W: Machine Learning with Graphs <https://www.youtube.com/watch?v=JAB_plj2rbA>`__ lectures.
+For an introduction to Graph Machine Learning, we refer the interested reader to the :stanford:`null` `Stanford CS224W: Machine Learning with Graphs <https://www.youtube.com/watch?v=JAB_plj2rbA>`__ lectures.
 For an interactive introduction to :pyg:`PyG`, we recommend our carefully curated :colab:`null` `Google Colab <colabs.html>`__ notebooks.
 
 At its core, :pyg:`PyG` provides the following main features:
@@ -86,7 +86,7 @@ Besides holding a number of node-level, edge-level or graph-level attributes, :c
 
 .. code-block:: python
 
-    print(data.keys)
+    print(data.keys())
     >>> ['x', 'edge_index']
 
     print(data['x'])
@@ -129,7 +129,7 @@ You can find a complete list of all methods at :class:`torch_geometric.data.Data
 Common Benchmark Datasets
 -------------------------
 
-:pyg:`PyG` contains a large number of common benchmark datasets, *e.g.*, all Planetoid datasets (Cora, Citeseer, Pubmed), all graph classification datasets from `http://graphkernels.cs.tu-dortmund.de <http://graphkernels.cs.tu-dortmund.de/>`_ and their `cleaned versions <https://github.com/nd7141/graph_datasets>`_, the QM7 and QM9 dataset, and a handful of 3D mesh/point cloud datasets like FAUST, ModelNet10/40 and ShapeNet.
+:pyg:`PyG` contains a large number of common benchmark datasets, *e.g.*, all Planetoid datasets (Cora, Citeseer, Pubmed), all graph classification datasets from `TUDatasets <https://chrsmrrs.github.io/datasets/>`_ and their `cleaned versions <https://github.com/nd7141/graph_datasets>`_, the QM7 and QM9 dataset, and a handful of 3D mesh/point cloud datasets like FAUST, ModelNet10/40 and ShapeNet.
 
 Initializing a dataset is straightforward.
 An initialization of a dataset will automatically download its raw files and process them to the previously described :class:`~torch_geometric.data.Data` format.
@@ -176,7 +176,7 @@ We can even use slices, long or bool tensors to split the dataset.
     test_dataset = dataset[540:]
     >>> ENZYMES(60)
 
-If you are unsure whether the dataset is already shuffled before you split, you can randomly permutate it by running:
+If you are unsure whether the dataset is already shuffled before you split, you can randomly permute it by running:
 
 .. code-block:: python
 

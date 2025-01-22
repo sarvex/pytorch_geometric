@@ -27,6 +27,8 @@ def benchmark(
     func_names: Optional[List[str]] = None,
     num_warmups: int = 10,
     backward: bool = False,
+    per_step: bool = False,
+    progress_bar: bool = False,
 ):
     r"""Benchmark a list of functions :obj:`funcs` that receive the same set
     of arguments :obj:`args`.
@@ -36,6 +38,8 @@ def benchmark(
         args ((Any, ) or [(Any, )]): The arguments to pass to the functions.
             Can be a list of arguments for each function in :obj:`funcs` in
             case their headers differ.
+            Alternatively, you can pass in functions that generate arguments
+            on-the-fly (e.g., useful for benchmarking models on various sizes).
         num_steps (int): The number of steps to run the benchmark.
         func_names ([str], optional): The names of the functions. If not given,
             will try to infer the name from the function itself.
@@ -44,6 +48,10 @@ def benchmark(
             (default: :obj:`10`)
         backward (bool, optional): If set to :obj:`True`, will benchmark both
             forward and backward passes. (default: :obj:`False`)
+        per_step (bool, optional): If set to :obj:`True`, will report runtimes
+            per step. (default: :obj:`False`)
+        progress_bar (bool, optional): If set to :obj:`True`, will print a
+            progress bar during benchmarking. (default: :obj:`False`)
     """
     from tabulate import tabulate
 
@@ -63,12 +71,18 @@ def benchmark(
                          f"'func_names' (got {len(func_names)}) must be equal")
 
     # Zero-copy `args` for each function (if necessary):
-    args_list = [args] * len(funcs) if isinstance(args, tuple) else args
+    args_list = [args] * len(funcs) if not isinstance(args, list) else args
+
+    iterator = zip(funcs, args_list, func_names)
+    if progress_bar:
+        from tqdm import tqdm
+        iterator = tqdm(iterator, total=len(funcs))
 
     ts: List[List[str]] = []
-    for func, args, name in zip(funcs, args_list, func_names):
+    for func, inputs, name in iterator:
         t_forward = t_backward = 0
         for i in range(num_warmups + num_steps):
+            args = inputs() if callable(inputs) else inputs
             args = require_grad(args, backward)
 
             if torch.cuda.is_available():
@@ -83,12 +97,11 @@ def benchmark(
                 t_forward += time.perf_counter() - t_start
 
             if backward:
-                # TODO Generalize this logic. This is also a bit unfair as the
-                # concatenation leads to incorrectly measured backward speeds.
                 if isinstance(out, (tuple, list)):
-                    out = torch.cat(out, dim=0)
+                    out = sum(o.sum() for o in out if isinstance(o, Tensor))
                 elif isinstance(out, dict):
-                    out = torch.cat(list(out.values()), dim=0)
+                    out = out.values()
+                    out = sum(o.sum() for o in out if isinstance(o, Tensor))
 
                 out_grad = torch.randn_like(out)
                 t_start = time.perf_counter()
@@ -100,10 +113,17 @@ def benchmark(
                 if i >= num_warmups:
                     t_backward += time.perf_counter() - t_start
 
-        ts.append([name, f'{t_forward:.4f}s'])
+        if per_step:
+            ts.append([name, f'{t_forward/num_steps:.6f}s'])
+        else:
+            ts.append([name, f'{t_forward:.4f}s'])
         if backward:
-            ts[-1].append(f'{t_backward:.4f}s')
-            ts[-1].append(f'{t_forward + t_backward:.4f}s')
+            if per_step:
+                ts[-1].append(f'{t_backward/num_steps:.6f}s')
+                ts[-1].append(f'{(t_forward + t_backward)/num_steps:.6f}s')
+            else:
+                ts[-1].append(f'{t_backward:.4f}s')
+                ts[-1].append(f'{t_forward + t_backward:.4f}s')
 
     header = ['Name', 'Forward']
     if backward:

@@ -4,21 +4,28 @@ import re
 from typing import Any, List, Optional
 
 
-def paper_link(cls: str) -> str:
+def paper_link(cls: str) -> Optional[str]:
     cls = importlib.import_module('torch_geometric.datasets').__dict__[cls]
-    match = re.search('<.+?>', inspect.getdoc(cls), flags=re.DOTALL)
+    doc = inspect.getdoc(cls)
+    assert doc is not None
+    match = re.search('<.+?>', doc, flags=re.DOTALL)
     return None if match is None else match.group().replace('\n', ' ')[1:-1]
 
 
 def get_stats_table(cls: str) -> str:
     cls = importlib.import_module('torch_geometric.datasets').__dict__[cls]
-    match = re.search(r'\*\*STATS:\*\*\n.*$', inspect.getdoc(cls),
-                      flags=re.DOTALL)
+    doc = inspect.getdoc(cls)
+    assert doc is not None
+    match = re.search(r'\*\*STATS:\*\*\n.*$', doc, flags=re.DOTALL)
     return '' if match is None else match.group()
 
 
 def has_stats(cls: str) -> bool:
     return len(get_stats_table(cls)) > 0
+
+
+def get_type(cls: str) -> str:
+    return 'Edge' if '-' in cls else 'Node'
 
 
 def get_stat(cls: str, name: str, child: Optional[str] = None,
@@ -40,6 +47,7 @@ def get_stat(cls: str, name: str, child: Optional[str] = None,
     if child is not None:
         child = child.replace('(', r'\(').replace(')', r'\)')
         match = re.search(f'[*] - {child}\n.*$', stats_table, flags=re.DOTALL)
+        assert match is not None
         stats_row = match.group()
     else:
         stats_row = '*' + stats_table.split('*')[2]

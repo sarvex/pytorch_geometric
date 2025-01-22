@@ -1,8 +1,10 @@
-import os
+import os.path as osp
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import torch
+
+from torch_geometric.io import fs
 
 try:
     from huggingface_hub import ModelHubMixin, hf_hub_download
@@ -23,7 +25,8 @@ class PyGModelHubMixin(ModelHubMixin):
     .. code-block:: python
 
        from torch_geometric.datasets import Planetoid
-       from torch_geometric.nn import Node2Vec, PyGModelHubMixin
+       from torch_geometric.nn import Node2Vec
+       from torch_geometric.nn.model_hub import PyGModelHubMixin
 
        # Define your class with the mixin:
        class N2V(Node2Vec, PyGModelHubMixin):
@@ -69,7 +72,8 @@ class PyGModelHubMixin(ModelHubMixin):
     """
     def __init__(self, model_name: str, dataset_name: str, model_kwargs: Dict):
         ModelHubMixin.__init__(self)
-        # Huggingface Hub api only accepts saving the config as a dict.
+
+        # Huggingface Hub API only accepts saving the config as a dict.
         # If the model is instantiated with non-native python types
         # such as torch Tensors (node2vec being an example), we have to remove
         # these as they are not json serialisable
@@ -94,8 +98,8 @@ class PyGModelHubMixin(ModelHubMixin):
         return card
 
     def _save_pretrained(self, save_directory: Union[Path, str]):
-        path = os.path.join(save_directory, MODEL_WEIGHTS_NAME)
-        model_to_save = self.module if hasattr(self, "module") else self
+        path = osp.join(save_directory, MODEL_WEIGHTS_NAME)
+        model_to_save = self.module if hasattr(self, 'module') else self
         torch.save(model_to_save.state_dict(), path)
 
     def save_pretrained(self, save_directory: Union[str, Path],
@@ -144,16 +148,16 @@ class PyGModelHubMixin(ModelHubMixin):
         resume_download,
         local_files_only,
         token,
-        dataset_name="",
-        model_name="",
-        map_location="cpu",
+        dataset_name='',
+        model_name='',
+        map_location='cpu',
         strict=False,
         **model_kwargs,
     ):
         map_location = torch.device(map_location)
 
-        if os.path.isdir(model_id):
-            model_file = os.path.join(model_id, MODEL_WEIGHTS_NAME)
+        if osp.isdir(model_id):
+            model_file = osp.join(model_id, MODEL_WEIGHTS_NAME)
         else:
             model_file = hf_hub_download(
                 repo_id=model_id,
@@ -173,7 +177,7 @@ class PyGModelHubMixin(ModelHubMixin):
 
         model = cls(dataset_name, model_name, model_kwargs)
 
-        state_dict = torch.load(model_file, map_location=map_location)
+        state_dict = fs.torch_load(model_file, map_location=map_location)
         model.load_state_dict(state_dict, strict=strict)
         model.eval()
 

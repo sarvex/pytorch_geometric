@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 from torch import Tensor
 
@@ -36,12 +38,17 @@ class ToSLIC(BaseTransform):
             <https://scikit-image.org/docs/dev/api/skimage.segmentation.html
             #skimage.segmentation.slic>`_ for an overview.
     """
-    def __init__(self, add_seg: bool = False, add_img: bool = False, **kwargs):
+    def __init__(
+        self,
+        add_seg: bool = False,
+        add_img: bool = False,
+        **kwargs: Any,
+    ) -> None:
         self.add_seg = add_seg
         self.add_img = add_img
         self.kwargs = kwargs
 
-    def __call__(self, img: Tensor) -> Data:
+    def forward(self, img: Tensor) -> Data:
         from skimage.segmentation import slic
 
         img = img.permute(1, 2, 0)

@@ -63,10 +63,33 @@ class LinkNeighborLoader(LinkLoader):
     The rest of the functionality mirrors that of
     :class:`~torch_geometric.loader.NeighborLoader`, including support for
     heterogeneous graphs.
+    In particular, the data loader will add the following attributes to the
+    returned mini-batch:
+
+    * :obj:`n_id` The global node index for every sampled node
+    * :obj:`e_id` The global edge index for every sampled edge
+    * :obj:`input_id`: The global index of the :obj:`edge_label_index`
+    * :obj:`num_sampled_nodes`: The number of sampled nodes in each hop
+    * :obj:`num_sampled_edges`: The number of sampled edges in each hop
 
     .. note::
         Negative sampling is currently implemented in an approximate
         way, *i.e.* negative edges may contain false negatives.
+
+    .. warning::
+        Note that the sampling scheme is independent from the edge we are
+        making a prediction for.
+        That is, by default supervision edges in :obj:`edge_label_index`
+        **will not** get masked out during sampling.
+        In case there exists an overlap between message passing edges in
+        :obj:`data.edge_index` and supervision edges in
+        :obj:`edge_label_index`, you might end up sampling an edge you are
+        making a prediction for.
+        You can generally avoid this behavior (if desired) by making
+        :obj:`data.edge_index` and :obj:`edge_label_index` two disjoint sets of
+        edges, *e.g.*, via the
+        :class:`~torch_geometric.transforms.RandomLinkSplit` transformation and
+        its :obj:`disjoint_train_ratio` argument.
 
     Args:
         data (Any): A :class:`~torch_geometric.data.Data`,
@@ -152,11 +175,18 @@ class LinkNeighborLoader(LinkLoader):
             Deprecated in favor of the :obj:`neg_sampling` argument.
             (default: :obj:`None`)
         time_attr (str, optional): The name of the attribute that denotes
-            timestamps for the nodes in the graph.
+            timestamps for either the nodes or edges in the graph.
             If set, temporal sampling will be used such that neighbors are
             guaranteed to fulfill temporal constraints, *i.e.* neighbors have
             an earlier or equal timestamp than the center node.
             Only used if :obj:`edge_label_time` is set. (default: :obj:`None`)
+        weight_attr (str, optional): The name of the attribute that denotes
+            edge weights in the graph.
+            If set, weighted/biased sampling will be used such that neighbors
+            are more likely to get sampled the higher their edge weights are.
+            Edge weights do not need to sum to one, but must be non-negative,
+            finite and have a non-zero sum within local neighborhoods.
+            (default: :obj:`None`)
         transform (callable, optional): A function/transform that takes in
             a sampled mini-batch and returns a transformed version.
             (default: :obj:`None`)
@@ -170,14 +200,17 @@ class LinkNeighborLoader(LinkLoader):
             This avoids internal re-sorting of the data and can improve
             runtime and memory efficiency. (default: :obj:`False`)
         filter_per_worker (bool, optional): If set to :obj:`True`, will filter
-            the returning data in each worker's subprocess rather than in the
-            main process.
-            Setting this to :obj:`True` for in-memory datasets is generally not
-            recommended:
-            (1) it may result in too many open file handles,
-            (2) it may slown down data loading,
-            (3) it requires operating on CPU tensors.
-            (default: :obj:`False`)
+            the returned data in each worker's subprocess.
+            If set to :obj:`False`, will filter the returned data in the main
+            process.
+            If set to :obj:`None`, will automatically infer the decision based
+            on whether data partially lives on the GPU
+            (:obj:`filter_per_worker=True`) or entirely on the CPU
+            (:obj:`filter_per_worker=False`).
+            There exists different trade-offs for setting this option.
+            Specifically, setting this option to :obj:`True` for in-memory
+            datasets will move all features to shared memory, which may result
+            in too many open file handles. (default: :obj:`None`)
         **kwargs (optional): Additional arguments of
             :class:`torch.utils.data.DataLoader`, such as :obj:`batch_size`,
             :obj:`shuffle`, :obj:`drop_last` or :obj:`num_workers`.
@@ -196,10 +229,11 @@ class LinkNeighborLoader(LinkLoader):
         neg_sampling: Optional[NegativeSampling] = None,
         neg_sampling_ratio: Optional[Union[int, float]] = None,
         time_attr: Optional[str] = None,
+        weight_attr: Optional[str] = None,
         transform: Optional[Callable] = None,
         transform_sampler_output: Optional[Callable] = None,
         is_sorted: bool = False,
-        filter_per_worker: bool = False,
+        filter_per_worker: Optional[bool] = None,
         neighbor_sampler: Optional[NeighborSampler] = None,
         directed: bool = True,  # Deprecated.
         **kwargs,
@@ -209,8 +243,9 @@ class LinkNeighborLoader(LinkLoader):
                 f"Received conflicting 'edge_label_time' and 'time_attr' "
                 f"arguments: 'edge_label_time' is "
                 f"{'set' if edge_label_time is not None else 'not set'} "
-                f"while 'input_time' is "
-                f"{'set' if time_attr is not None else 'not set'}.")
+                f"while 'time_attr' is "
+                f"{'set' if time_attr is not None else 'not set'}. "
+                f"Both arguments must be provided for temporal sampling.")
 
         if neighbor_sampler is None:
             neighbor_sampler = NeighborSampler(
@@ -221,6 +256,7 @@ class LinkNeighborLoader(LinkLoader):
                 disjoint=disjoint,
                 temporal_strategy=temporal_strategy,
                 time_attr=time_attr,
+                weight_attr=weight_attr,
                 is_sorted=is_sorted,
                 share_memory=kwargs.get('num_workers', 0) > 0,
                 directed=directed,

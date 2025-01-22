@@ -39,16 +39,12 @@ def test_multi_aggr(multi_aggr_tuple):
     out = aggr(x, index)
     assert out.size() == (4, expand * x.size(1))
 
-    if not torch_geometric.typing.WITH_TORCH_SCATTER:
-        with pytest.raises(ImportError, match="'segment' requires"):
+    if (not torch_geometric.typing.WITH_TORCH_SCATTER
+            and not torch_geometric.typing.WITH_PT20):
+        with pytest.raises(ImportError, match="requires the 'torch-scatter'"):
             aggr(x, ptr=ptr)
     else:
         assert torch.allclose(out, aggr(x, ptr=ptr))
 
-    if aggr_kwargs['mode'] == 'attn' and torch_geometric.typing.WITH_GMM:
-        # See: https://github.com/pytorch/pytorch/pull/97960
-        with pytest.raises(RuntimeError, match="Unknown builtin op"):
-            jit = torch.jit.script(aggr)
-    else:
-        jit = torch.jit.script(aggr)
-        assert torch.allclose(out, jit(x, index))
+    jit = torch.jit.script(aggr)
+    assert torch.allclose(out, jit(x, index))

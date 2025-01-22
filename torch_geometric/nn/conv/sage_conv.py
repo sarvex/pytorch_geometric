@@ -2,7 +2,6 @@ from typing import List, Optional, Tuple, Union
 
 import torch.nn.functional as F
 from torch import Tensor
-from torch.nn import LSTM
 
 from torch_geometric.nn.aggr import Aggregation, MultiAggregation
 from torch_geometric.nn.conv import MessagePassing
@@ -13,7 +12,7 @@ from torch_geometric.utils import spmm
 
 class SAGEConv(MessagePassing):
     r"""The GraphSAGE operator from the `"Inductive Representation Learning on
-    Large Graphs" <https://arxiv.org/abs/1706.02216>`_ paper
+    Large Graphs" <https://arxiv.org/abs/1706.02216>`_ paper.
 
     .. math::
         \mathbf{x}^{\prime}_i = \mathbf{W}_1 \mathbf{x}_i + \mathbf{W}_2 \cdot
@@ -92,11 +91,11 @@ class SAGEConv(MessagePassing):
         super().__init__(aggr, **kwargs)
 
         if self.project:
+            if in_channels[0] <= 0:
+                raise ValueError(f"'{self.__class__.__name__}' does not "
+                                 f"support lazy initialization with "
+                                 f"`project=True`")
             self.lin = Linear(in_channels[0], in_channels[0], bias=True)
-
-        if self.aggr is None:
-            self.fuse = False  # No "fused" message_and_aggregate.
-            self.lstm = LSTM(in_channels[0], in_channels[0], batch_first=True)
 
         if isinstance(self.aggr_module, MultiAggregation):
             aggr_out_channels = self.aggr_module.get_out_channels(
@@ -118,11 +117,15 @@ class SAGEConv(MessagePassing):
         if self.root_weight:
             self.lin_r.reset_parameters()
 
-    def forward(self, x: Union[Tensor, OptPairTensor], edge_index: Adj,
-                size: Size = None) -> Tensor:
+    def forward(
+        self,
+        x: Union[Tensor, OptPairTensor],
+        edge_index: Adj,
+        size: Size = None,
+    ) -> Tensor:
 
         if isinstance(x, Tensor):
-            x: OptPairTensor = (x, x)
+            x = (x, x)
 
         if self.project and hasattr(self, 'lin'):
             x = (self.lin(x[0]).relu(), x[1])
@@ -143,8 +146,7 @@ class SAGEConv(MessagePassing):
     def message(self, x_j: Tensor) -> Tensor:
         return x_j
 
-    def message_and_aggregate(self, adj_t: SparseTensor,
-                              x: OptPairTensor) -> Tensor:
+    def message_and_aggregate(self, adj_t: Adj, x: OptPairTensor) -> Tensor:
         if isinstance(adj_t, SparseTensor):
             adj_t = adj_t.set_value(None, layout=None)
         return spmm(adj_t, x[0], reduce=self.aggr)

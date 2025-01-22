@@ -1,3 +1,4 @@
+import copy
 import os.path as osp
 
 import torch
@@ -15,6 +16,7 @@ from torch_geometric.utils import scatter
 
 class HandleNodeAttention:
     def __call__(self, data):
+        data = copy.copy(data)
         data.attn = torch.softmax(data.x, dim=0).flatten()
         data.x = None
         return data
@@ -69,7 +71,7 @@ model = Net(dataset.num_features).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
-def train(epoch):
+def train():
     model.train()
 
     total_loss = 0
@@ -99,7 +101,7 @@ def test(loader):
 
 
 for epoch in range(1, 301):
-    loss = train(epoch)
+    loss = train()
     train_correct, train_ratio = test(train_loader)
     val_correct, val_ratio = test(val_loader)
     test_correct, test_ratio = test(test_loader)
